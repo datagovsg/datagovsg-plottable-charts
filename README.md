@@ -26,7 +26,7 @@ pie.mount(document.getElementById('ctn'))
 pie.update(newProps)
 ```
 
-### Debugging
+### Debugging guide
 
 1. Clone the [datagovsg/datagovsg-plottable-charts](https://github.com/datagovsg/datagovsg-plottable-charts) repo
 2. Add a new branch
@@ -35,6 +35,15 @@ pie.update(newProps)
 5. npm install your commit
 
 ##### Example
+
 ```bash
 npm install github:datagovsg/datagovsg-plottable-charts#cbaddd65159506d633c4d4aea214e5fc3fea5c76
+```
+
+##### Alternatively
+
+Install local module instead of fetching from remote repo
+
+```bash
+npm install ../datagovsg-plottable-charts
 ```
