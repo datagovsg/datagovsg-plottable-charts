@@ -5,7 +5,7 @@ import StackedBar from './components/StackedBar'
 import SimpleLine from './components/SimpleLine'
 import MultipleLine from './components/MultipleLine'
 
-export default {
+module.exports = {
   SimplePie,
   SimpleBar,
   GroupedBar,

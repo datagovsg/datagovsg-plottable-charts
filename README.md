@@ -3,7 +3,7 @@ Reusable Plottable chart components
 
 ### Using the chart components
 ```bash
-npm install github:datagovsg/datagovsg-plottable-charts
+npm install --save github:datagovsg/datagovsg-plottable-charts
 ```
 
 ```javascript
@@ -37,7 +37,7 @@ pie.update(newProps)
 ##### Example
 
 ```bash
-npm install github:datagovsg/datagovsg-plottable-charts#cbaddd65159506d633c4d4aea214e5fc3fea5c76
+npm install --save github:datagovsg/datagovsg-plottable-charts#cbaddd65159506d633c4d4aea214e5fc3fea5c76
 ```
 
 ##### Alternatively
