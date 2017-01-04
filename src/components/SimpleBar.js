@@ -1,6 +1,6 @@
 import sortBy from 'lodash/sortBy'
 import throttle from 'lodash/throttle'
-import {shortScaleFormatter} from './helpers'
+import {getCustomShortScaleFormatter} from '../helpers'
 
 const defaultProps = {
   orientation: 'v',
@@ -12,6 +12,27 @@ const defaultProps = {
   showYgridlines: false,
   animated: true
 }
+
+/**
+ * @param labels [String] (required)
+ * @param values [Number] (required)
+ * @param sorted Boolean (default false)
+ * @param scale Object (default new Plottable.Scales.Linear())
+ * @param colorScale Object (default new Plottable.Scales.Color())
+ * @param orientation 'h'/'v' (default 'h')
+ * @param baselineValue Number (default 0)
+ * @param labelFormatter Function (optional)
+ * @param hideXaxis Boolean (default false)
+ * @param hideYaxis Boolean (default false)
+ * @param showXgridlines Boolean (default false)
+ * @param showYgridlines Boolean (default false)
+ * @param legendPosition 't'/'r'/'b'/'l'/'none' (default 'r')
+ * @param xLabel String (optional)
+ * @param yLabel String (optional)
+ * @param animated Boolean (default true)
+ * @param clickHandler Function (optional)
+ * @param hoverHandler Function (optional)
+ */
 
 export default class SimpleBar {
   constructor (props) {
@@ -66,6 +87,11 @@ export default class SimpleBar {
         .attachTo(this.plot)
     }
 
+    this.legend = new Plottable.Components.Legend(colorScale)
+      .addClass('simple-bar-legend')
+      .xAlignment('center')
+      .yAlignment('center')
+
     let plotArea
     if (props.showXgridlines || props.showYgridlines) {
       const xScale = (props.showXgridlines && horizontal) ? scale : null
@@ -76,29 +102,41 @@ export default class SimpleBar {
       plotArea = this.plot
     }
 
-    this.layout = new Plottable.Components.Table([
-      [null, plotArea, null],
-      [null, null]
+    const _layout = new Plottable.Components.Table([
+      [null, null, plotArea],
+      [null, null, null],
+      [null, null, null]
     ])
+    if (!props.hideXaxis) {
+      const xAxis = horizontal
+        ? new Plottable.Axes.Numeric(scale, 'bottom').formatter(getCustomShortScaleFormatter())
+        : new Plottable.Axes.Category(categoryScale, 'bottom')
+      if (!horizontal && props.values.length > 7) xAxis.formatter(() => '')
+      this.layout.add(xAxis, 1, 2)
+    }
+    if (!props.hideYaxis) {
+      const yAxis = horizontal
+        ? new Plottable.Axes.Category(categoryScale, 'left')
+        : new Plottable.Axes.Numeric(scale, 'left').formatter(getCustomShortScaleFormatter())
+      this.layout.add(yAxis, 0, 1)
+    }
+    if (props.xLabel) {
+      _layout.add(new Plottable.Components.AxisLabel(props.xLabel), 2, 2)
+    }
+    if (props.yLabel) {
+      _layout.add(new Plottable.Components.AxisLabel(props.yLabel, -90), 0, 0)
+    }
+
     if (!horizontal && props.values.length > 7) {
       this.legend = new Plottable.Components.Legend(colorScale)
         .addClass('simple-bar-legend')
         .xAlignment('center')
         .yAlignment('center')
-      this.layout.add(this.legend, 0, 2)
-    }
-    if (!props.hideXaxis) {
-      const xAxis = horizontal
-        ? new Plottable.Axes.Numeric(scale, 'bottom').formatter(shortScaleFormatter)
-        : new Plottable.Axes.Category(categoryScale, 'bottom')
-      if (!horizontal && props.values.length > 7) xAxis.formatter(() => '')
-      this.layout.add(xAxis, 1, 1)
-    }
-    if (!props.hideYaxis) {
-      const yAxis = horizontal
-        ? new Plottable.Axes.Category(categoryScale, 'left')
-        : new Plottable.Axes.Numeric(scale, 'left').formatter(shortScaleFormatter)
-      this.layout.add(yAxis, 0, 0)
+      this.layout = new Plottable.Components.Table([
+        [_layout, this.legend]
+      ]).columnPadding(10)
+    } else {
+      this.layout = _layout
     }
 
     this.resizeHandler = throttle(this.resizeHandler, 200).bind(this)
@@ -127,13 +165,4 @@ export default class SimpleBar {
     const colorScale = nextProps.colorScale || new Plottable.Scales.Color()
     this.plot.attr('fill', d => d.label, colorScale)
   }
-}
-
-SimpleBar.defaultProps = {
-  orientation: 'v',
-  baselineValue: 0,
-  showPercent: false,
-  hideXaxis: false,
-  hideYaxis: false,
-  animated: true
 }

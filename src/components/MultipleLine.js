@@ -1,5 +1,5 @@
 import throttle from 'lodash/throttle'
-import {shortScaleFormatter} from './helpers'
+import {getCustomShortScaleFormatter} from '../helpers'
 
 const defaultProps = {
   orientation: 'v',
@@ -77,29 +77,36 @@ export default class MultipleLine {
       .yAlignment('center')
 
     const _layout = new Plottable.Components.Table([
-      [null, plotArea],
-      [null, null]
+      [null, null, plotArea],
+      [null, null, null],
+      [null, null, null]
     ])
     if (!props.hideXaxis) {
       const xAxis =
           xScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(xScale, 'bottom')
-        : xScale instanceof Plottable.QuantitativeScale ? new Plottable.Axes.Numeric(xScale, 'bottom').formatter(shortScaleFormatter)
+        : xScale instanceof Plottable.QuantitativeScale ? new Plottable.Axes.Numeric(xScale, 'bottom').formatter(getCustomShortScaleFormatter())
         : xScale instanceof Plottable.Scales.Category ? new Plottable.Axes.Category(xScale, 'bottom')
         : null
-      if (xAxis) _layout.add(xAxis, 1, 1)
+      if (xAxis) _layout.add(xAxis, 1, 2)
     }
     if (!props.hideYaxis) {
       const yAxis =
           yScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(yScale, 'left')
-        : yScale instanceof Plottable.QuantitativeScale ? new Plottable.Axes.Numeric(yScale, 'left').formatter(shortScaleFormatter)
+        : yScale instanceof Plottable.QuantitativeScale ? new Plottable.Axes.Numeric(yScale, 'left').formatter(getCustomShortScaleFormatter())
         : yScale instanceof Plottable.Scales.Category ? new Plottable.Axes.Category(yScale, 'left')
         : null
-      if (yAxis) _layout.add(yAxis, 0, 0)
+      if (yAxis) _layout.add(yAxis, 0, 1)
+    }
+    if (props.xLabel) {
+      _layout.add(new Plottable.Components.AxisLabel(props.xLabel), 2, 2)
+    }
+    if (props.yLabel) {
+      _layout.add(new Plottable.Components.AxisLabel(props.yLabel, -90), 0, 0)
     }
 
     if (props.legendPosition === 't') {
       this.layout = new Plottable.Components.Table([
-        [this.legend.maxEntriesPerRow(99)],
+        [this.legend.maxEntriesPerRow(Infinity)],
         [_layout]
       ]).rowPadding(10)
     } else if (props.legendPosition === 'r') {
@@ -109,7 +116,7 @@ export default class MultipleLine {
     } else if (props.legendPosition === 'b') {
       this.layout = new Plottable.Components.Table([
         [_layout],
-        [this.legend.maxEntriesPerRow(99)]
+        [this.legend.maxEntriesPerRow(Infinity)]
       ]).rowPadding(10)
     } else if (props.legendPosition === 'l') {
       this.layout = new Plottable.Components.Table([

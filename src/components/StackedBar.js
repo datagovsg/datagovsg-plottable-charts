@@ -1,5 +1,5 @@
 import throttle from 'lodash/throttle'
-import {shortScaleFormatter} from './helpers'
+import {getCustomShortScaleFormatter} from '../helpers'
 
 const defaultProps = {
   orientation: 'v',
@@ -11,6 +11,27 @@ const defaultProps = {
   legendPosition: 'r',
   animated: true
 }
+
+/**
+ * @param labels [String] (required)
+ * @param traces [{labels: [String], values: [Number]}] (required)
+ * @param sorted Boolean (default false)
+ * @param scale Object (default new Plottable.Scales.Linear())
+ * @param colorScale Object (default new Plottable.Scales.Color())
+ * @param orientation 'h'/'v' (default 'h')
+ * @param baselineValue Number (default 0)
+ * @param labelFormatter Function (optional)
+ * @param hideXaxis Boolean (default false)
+ * @param hideYaxis Boolean (default false)
+ * @param showXgridlines Boolean (default false)
+ * @param showYgridlines Boolean (default false)
+ * @param legendPosition 't'/'r'/'b'/'l'/'none' (default 'r')
+ * @param xLabel String (optional)
+ * @param yLabel String (optional)
+ * @param animated Boolean (default true)
+ * @param clickHandler Function (optional)
+ * @param hoverHandler Function (optional)
+ */
 
 export default class StackedBar {
   constructor (props) {
@@ -67,11 +88,6 @@ export default class StackedBar {
         .attachTo(this.plot)
     }
 
-    this.legend = new Plottable.Components.Legend(colorScale)
-      .addClass('stacked-bar-legend')
-      .xAlignment('center')
-      .yAlignment('center')
-
     let plotArea
     if (props.showXgridlines || props.showYgridlines) {
       const xScale = (props.showXgridlines && horizontal) ? scale : null
@@ -83,25 +99,36 @@ export default class StackedBar {
     }
 
     const _layout = new Plottable.Components.Table([
-      [null, plotArea],
-      [null, null]
+      [null, null, plotArea],
+      [null, null, null],
+      [null, null, null]
     ])
     if (!props.hideXaxis) {
       const xAxis = horizontal
-        ? new Plottable.Axes.Numeric(scale, 'bottom').formatter(shortScaleFormatter)
+        ? new Plottable.Axes.Numeric(scale, 'bottom').formatter(getCustomShortScaleFormatter())
         : new Plottable.Axes.Category(categoryScale, 'bottom')
-      _layout.add(xAxis, 1, 1)
+      _layout.add(xAxis, 1, 2)
     }
     if (!props.hideYaxis) {
       const yAxis = horizontal
         ? new Plottable.Axes.Category(categoryScale, 'left')
-        : new Plottable.Axes.Numeric(scale, 'left').formatter(shortScaleFormatter)
-      _layout.add(yAxis, 0, 0)
+        : new Plottable.Axes.Numeric(scale, 'left').formatter(getCustomShortScaleFormatter())
+      _layout.add(yAxis, 0, 1)
+    }
+    if (props.xLabel) {
+      _layout.add(new Plottable.Components.AxisLabel(props.xLabel), 2, 2)
+    }
+    if (props.yLabel) {
+      _layout.add(new Plottable.Components.AxisLabel(props.yLabel, -90), 0, 0)
     }
 
+    this.legend = new Plottable.Components.Legend(colorScale)
+      .addClass('stacked-bar-legend')
+      .xAlignment('center')
+      .yAlignment('center')
     if (props.legendPosition === 't') {
       this.layout = new Plottable.Components.Table([
-        [this.legend.maxEntriesPerRow(99)],
+        [this.legend.maxEntriesPerRow(Infinity)],
         [_layout]
       ]).rowPadding(10)
     } else if (props.legendPosition === 'r') {
@@ -111,7 +138,7 @@ export default class StackedBar {
     } else if (props.legendPosition === 'b') {
       this.layout = new Plottable.Components.Table([
         [_layout],
-        [this.legend.maxEntriesPerRow(99)]
+        [this.legend.maxEntriesPerRow(Infinity)]
       ]).rowPadding(10)
     } else if (props.legendPosition === 'l') {
       this.layout = new Plottable.Components.Table([
