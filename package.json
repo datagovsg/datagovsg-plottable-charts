@@ -4,7 +4,7 @@
   "description": "Reusable Plottable chart components",
   "main": "dist/index.js",
   "scripts": {
-    "build": "babel src --out-dir dist -s",
+    "build": "rm -rf dist/ && mkdir dist && babel src --out-dir dist -s",
     "test": "standard src/**/*.js",
     "postinstall": "npm run build"
   },

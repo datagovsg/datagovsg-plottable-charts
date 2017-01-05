@@ -1,18 +1,37 @@
 import throttle from 'lodash/throttle'
 import {getCustomShortScaleFormatter} from '../helpers'
 
-const defaultProps = {
-  orientation: 'v',
-  showPoints: false,
-  hideXaxis: false,
-  hideYaxis: false,
-  showXgridlines: false,
-  showYgridlines: false,
-  legendPosition: 'r'
-}
-
 export default class MultipleLine {
+  /**
+   * @param {string[]} props.labels - required
+   * @param {Object[]} props.traces - required
+   * @param {string[]} props.traces.labels - required
+   * @param {number[]} props.traces.valuess - required
+   * @param {Object} props.xScale - default new Plottable.Scales.Linear()
+   * @param {Object} props.yScale - default new Plottable.Scales.Linear()
+   * @param {Object} props.colorScale - default new Plottable.Scales.Color()
+   * @param {boolean} props.showMarkers - default 'h'
+   * @param {Function} props.tooltipFormatter - optional
+   * @param {boolean} props.hideXaxis - default false
+   * @param {boolean} props.hideYaxis - default false
+   * @param {boolean} props.showXgridlines - default false
+   * @param {boolean} props.showYgridlines - default false
+   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
+   * @param {string} props.xLabel - optional
+   * @param {string} props.yLabel - optional
+   * @param {Function} props.clickHandler - optional
+   * @param {function} props.hoverHandler - optional
+   */
   constructor (props) {
+    const defaultProps = {
+      orientation: 'v',
+      showMarkers: false,
+      hideXaxis: false,
+      hideYaxis: false,
+      showXgridlines: false,
+      showYgridlines: false,
+      legendPosition: 'r'
+    }
     props = Object.assign({}, defaultProps, props)
 
     if (props.labels.length !== props.traces.length) throw new Error()
@@ -31,7 +50,7 @@ export default class MultipleLine {
       .x(d => d.x, xScale)
       .y(d => d.y, yScale)
 
-    const markers = props.showPoints ? (
+    const markers = props.showMarkers ? (
       new Plottable.Plots.Scatter()
         .attr('opacity', 1)
         .attr('fill', (d, i, dataset) => dataset.metadata(), colorScale)
@@ -43,6 +62,10 @@ export default class MultipleLine {
       this.plot.addDataset(dataset)
       if (markers) markers.addDataset(dataset)
     })
+
+    if (props.showMarkers && props.tooltipFormatter) {
+      markers.attr('data-title', props.tooltipFormatter)
+    }
 
     if (props.clickHandler) {
       new Plottable.Interactions.Click()
@@ -136,33 +159,26 @@ export default class MultipleLine {
   mount (element) {
     this.layout.renderTo(element)
 
-    const tooltipAnchorSelection = this.plot.foreground()
-      .append('circle')
-      .attr({r: 3, opacity: 0})
-    const tooltipAnchor = $(tooltipAnchorSelection.node())
-    tooltipAnchor.tooltip({
+    $(element).find('.render-area .symbol').tooltip({
       animation: false,
-      container: 'body',
-      placement: 'right',
-      title: 'text',
-      trigger: 'manual'
+      container: element,
+      html: true,
+      placement (tip, target) {
+        var position = $(target).position()
+
+        var width = element.width()
+        var height = element.height()
+        var targetHeight = $(target).attr('height') ? +$(target).attr('height') : 0
+        var targetWidth = $(target).attr('width') ? +$(target).attr('width') : 0
+
+        // determine position by elimination
+        if (position.left + targetWidth <= width * 0.9) return 'right'
+        else if (position.left >= width * 0.1) return 'left'
+        else if (position.top >= height * 0.4) return 'top'
+        else if (position.top + targetHeight <= height * 0.6) return 'bottom'
+        else return 'right'
+      }
     })
-    new Plottable.Interactions.Pointer()
-      .onPointerMove(point => {
-        const target = this.plot.entityNearest(point)
-        if (target) {
-          tooltipAnchorSelection.attr({
-            cx: target.position.x,
-            cy: target.position.y,
-            'data-original-title': [target.dataset.metadata(), target.datum.x, target.datum.y].join(' ')
-          })
-          tooltipAnchor.tooltip('show')
-        }
-      })
-      .onPointerExit(point => {
-        tooltipAnchor.tooltip('hide')
-      })
-      .attachTo(this.plot)
 
     window.addEventListener('resize', this.resizeHandler)
   }
