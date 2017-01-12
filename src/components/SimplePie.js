@@ -1,14 +1,25 @@
 import throttle from 'lodash/throttle'
 
-const defaultProps = {
-  innerRadius: 0,
-  hideLegend: false,
-  animated: true
-}
-
 export default class SimplePie {
+  /**
+   * @param {string[]} props.labels - required
+   * @param {number[]} props.valuess - required
+   * @param {Object} props.colorScale - default new Plottable.Scales.Color()
+   * @param {number} props.innerRadius - default 0
+   * @param {Function} props.labelFormatter - optional
+   * @param {Function} props.tooltipFormatter - optional
+   * @param {string} props.hideLabel - default false
+   * @param {boolean} props.animated - default true
+   * @param {Function} props.clickHandler - optional
+   * @param {function} props.hoverHandler - optional
+   */
   constructor (props) {
-    props = Object.assign({}, defaultProps, props)
+    const defaultProps = {
+      innerRadius: 0,
+      hideLegend: false,
+      animated: true
+    }
+    props = Object.assign(defaultProps, props)
 
     if (props.labels.length !== props.values.length) throw new Error()
     const data = props.values.map((v, i) => ({value: v, label: props.labels[i]}))
@@ -28,6 +39,11 @@ export default class SimplePie {
 
     if (props.labelFormatter) {
       this.plot.labelFormatter(props.labelFormatter).labelsEnabled(true)
+    }
+
+    if (props.tooltipFormatter) {
+      this.plot.attr('data-title', props.tooltipFormatter)
+      this.tooltipEnabled = true
     }
 
     if (props.clickHandler) {

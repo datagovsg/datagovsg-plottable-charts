@@ -35,7 +35,7 @@ export default class GroupedBar {
       legendPosition: 'r',
       animated: true
     }
-    props = Object.assign({}, defaultProps, props)
+    props = Object.assign(defaultProps, props)
 
     if (props.labels.length !== props.traces.length) throw new Error()
     this.datasets = props.traces.map((t, i) => {
@@ -52,7 +52,6 @@ export default class GroupedBar {
       ? Plottable.Plots.Bar.ORIENTATION_HORIZONTAL
       : Plottable.Plots.Bar.ORIENTATION_VERTICAL
     this.plot = new Plottable.Plots.ClusteredBar(plotType)
-      .addClass('grouped-bar-plot')
       .attr('fill', (d, i, dataset) => dataset.metadata(), colorScale)
       .labelsEnabled(false)
       .animated(props.animated)
@@ -69,6 +68,7 @@ export default class GroupedBar {
 
     if (props.tooltipFormatter) {
       this.plot.attr('data-title', props.tooltipFormatter)
+      this.tooltipEnabled = true
     }
 
     if (props.clickHandler) {
@@ -108,16 +108,16 @@ export default class GroupedBar {
       [null, null, null]
     ])
     if (!props.hideXaxis) {
-      const xAxis = horizontal
+      this.xAxis = horizontal
         ? new Plottable.Axes.Numeric(scale, 'bottom').formatter(getCustomShortScaleFormatter())
         : new Plottable.Axes.Category(categoryScale, 'bottom')
-      _layout.add(xAxis, 1, 2)
+      _layout.add(this.xAxis, 1, 2)
     }
     if (!props.hideYaxis) {
-      const yAxis = horizontal
+      this.yAxis = horizontal
         ? new Plottable.Axes.Category(categoryScale, 'left')
         : new Plottable.Axes.Numeric(scale, 'left').formatter(getCustomShortScaleFormatter())
-      _layout.add(yAxis, 0, 1)
+      _layout.add(this.yAxis, 0, 1)
     }
     if (props.xLabel) {
       _layout.add(new Plottable.Components.AxisLabel(props.xLabel), 2, 2)
@@ -127,7 +127,6 @@ export default class GroupedBar {
     }
 
     this.legend = new Plottable.Components.Legend(colorScale)
-      .addClass('grouped-bar-legend')
       .xAlignment('center')
       .yAlignment('center')
     if (props.legendPosition === 't') {
@@ -162,26 +161,28 @@ export default class GroupedBar {
   mount (element) {
     this.layout.renderTo(element)
 
-    $(element).find('.bar-area rect').tooltip({
-      animation: false,
-      container: element,
-      html: true,
-      placement (tip, target) {
-        var position = $(target).position()
+    if (this.tooltipEnabled) {
+      $(element).find('.bar-area rect').tooltip({
+        animation: false,
+        container: element,
+        html: true,
+        placement (tip, target) {
+          var position = $(target).position()
 
-        var width = element.width()
-        var height = element.height()
-        var targetHeight = $(target).attr('height') ? +$(target).attr('height') : 0
-        var targetWidth = $(target).attr('width') ? +$(target).attr('width') : 0
+          var width = element.width()
+          var height = element.height()
+          var targetHeight = $(target).attr('height') ? +$(target).attr('height') : 0
+          var targetWidth = $(target).attr('width') ? +$(target).attr('width') : 0
 
-        // determine position by elimination
-        if (position.left + targetWidth <= width * 0.9) return 'right'
-        else if (position.left >= width * 0.1) return 'left'
-        else if (position.top >= height * 0.4) return 'top'
-        else if (position.top + targetHeight <= height * 0.6) return 'bottom'
-        else return 'right'
-      }
-    })
+          // determine position by elimination
+          if (position.left + targetWidth <= width * 0.9) return 'right'
+          else if (position.left >= width * 0.1) return 'left'
+          else if (position.top >= height * 0.4) return 'top'
+          else if (position.top + targetHeight <= height * 0.6) return 'bottom'
+          else return 'right'
+        }
+      })
+    }
 
     window.addEventListener('resize', this.resizeHandler)
   }

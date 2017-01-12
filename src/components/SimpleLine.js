@@ -8,7 +8,7 @@ export default class SimpleLine {
    * @param {Object} props.xScale - default new Plottable.Scales.Linear()
    * @param {Object} props.yScale - default new Plottable.Scales.Linear()
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
-   * @param {boolean} props.showMarkers - default 'h'
+   * @param {number} props.markerSize - default 0
    * @param {Function} props.tooltipFormatter - optional
    * @param {boolean} props.hideXaxis - default false
    * @param {boolean} props.hideYaxis - default false
@@ -28,7 +28,7 @@ export default class SimpleLine {
       showXgridlines: false,
       showYgridlines: false
     }
-    props = Object.assign({}, defaultProps, props)
+    props = Object.assign(defaultProps, props)
 
     if (props.x.length !== props.y.length) throw new Error()
     const data = props.y.map((v, i) => ({y: v, x: props.x[i]}))
@@ -37,50 +37,51 @@ export default class SimpleLine {
     const xScale = props.xScale || new Plottable.Scales.Linear()
     const yScale = props.yScale || new Plottable.Scales.Linear()
 
-    this.plot = new Plottable.Plots.Line()
-      .addClass('simple-line-plot')
-      .addDataset(this.dataset)
-      .x(d => d.x, xScale)
-      .y(d => d.y, yScale)
-
-    const markers = props.showMarkers ? (
-      new Plottable.Plots.Scatter()
+    this.plot = {
+      lines: new Plottable.Plots.Line()
         .addDataset(this.dataset)
-        .attr('opacity', 1)
         .x(d => d.x, xScale)
         .y(d => d.y, yScale)
-    ) : null
+        .attr('stroke-width', props.strokeWidth),
+      markers: new Plottable.Plots.Scatter()
+          .addDataset(this.dataset)
+          .attr('opacity', 1)
+          .x(d => d.x, xScale)
+          .y(d => d.y, yScale)
+          .size(props.markerSize)
+    }
 
-    if (props.showMarkers && props.tooltipFormatter) {
-      markers.attr('data-title', props.tooltipFormatter)
+    if (props.tooltipFormatter) {
+      this.plot.markers.attr('data-title', props.tooltipFormatter)
+      this.tooltipEnabled = true
     }
 
     if (props.clickHandler) {
       new Plottable.Interactions.Click()
         .onClick(point => {
-          const target = this.plot.entityNearest(point)
-          props.clickHandler(target, this.plot.entities())
+          const target = this.plot.markers.entityNearest(point)
+          props.clickHandler(target, this.plot.markers.entities())
         })
-        .attachTo(this.plot)
+        .attachTo(this.plot.markers)
     }
 
     if (props.hoverHandler) {
       new Plottable.Interactions.Pointer()
         .onPointerMove(point => {
-          const target = this.plot.entityNearest(point)
-          props.hoverHandler(target, this.plot.entities())
+          const target = this.plot.markers.entityNearest(point)
+          props.hoverHandler(target, this.plot.markers.entities())
         })
         .onPointerExit(point => {
-          props.hoverHandler(null, this.plot.entities())
+          props.hoverHandler(null, this.plot.markers.entities())
         })
-        .attachTo(this.plot)
+        .attachTo(this.plot.markers)
     }
 
     const gridlines = new Plottable.Components.Gridlines(
       (props.showXgridlines && xScale instanceof Plottable.QuantitativeScale) ? xScale : null,
       (props.showYgridlines && yScale instanceof Plottable.QuantitativeScale) ? yScale : null
     )
-    const plotArea = new Plottable.Components.Group([gridlines, this.plot, markers])
+    const plotArea = new Plottable.Components.Group([gridlines, this.plot.lines, this.plot.markers])
 
     this.layout = new Plottable.Components.Table([
       [null, null, plotArea],
@@ -88,20 +89,20 @@ export default class SimpleLine {
       [null, null, null]
     ])
     if (!props.hideXaxis) {
-      const xAxis =
+      this.xAxis =
           xScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(xScale, 'bottom')
         : xScale instanceof Plottable.QuantitativeScale ? new Plottable.Axes.Numeric(xScale, 'bottom').formatter(getCustomShortScaleFormatter())
         : xScale instanceof Plottable.Scales.Category ? new Plottable.Axes.Category(xScale, 'bottom')
         : null
-      if (xAxis) this.layout.add(xAxis, 1, 2)
+      if (this.xAxis) this.layout.add(this.xAxis, 1, 2)
     }
     if (!props.hideYaxis) {
-      const yAxis =
+      this.yAxis =
           yScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(yScale, 'left')
         : yScale instanceof Plottable.QuantitativeScale ? new Plottable.Axes.Numeric(yScale, 'left').formatter(getCustomShortScaleFormatter())
         : yScale instanceof Plottable.Scales.Category ? new Plottable.Axes.Category(yScale, 'left')
         : null
-      if (yAxis) this.layout.add(yAxis, 0, 1)
+      if (this.yAxis) this.layout.add(this.yAxis, 0, 1)
     }
     if (props.xLabel) {
       this.layout.add(new Plottable.Components.AxisLabel(props.xLabel), 2, 2)
@@ -120,26 +121,28 @@ export default class SimpleLine {
   mount (element) {
     this.layout.renderTo(element)
 
-    $(element).find('.render-area .symbol').tooltip({
-      animation: false,
-      container: element,
-      html: true,
-      placement (tip, target) {
-        var position = $(target).position()
+    if (this.tooltipEnabled) {
+      $(element).find('.render-area .symbol').tooltip({
+        animation: false,
+        container: element,
+        html: true,
+        placement (tip, target) {
+          var position = $(target).position()
 
-        var width = element.width()
-        var height = element.height()
-        var targetHeight = $(target).attr('height') ? +$(target).attr('height') : 0
-        var targetWidth = $(target).attr('width') ? +$(target).attr('width') : 0
+          var width = element.width()
+          var height = element.height()
+          var targetHeight = $(target).attr('height') ? +$(target).attr('height') : 0
+          var targetWidth = $(target).attr('width') ? +$(target).attr('width') : 0
 
-        // determine position by elimination
-        if (position.left + targetWidth <= width * 0.9) return 'right'
-        else if (position.left >= width * 0.1) return 'left'
-        else if (position.top >= height * 0.4) return 'top'
-        else if (position.top + targetHeight <= height * 0.6) return 'bottom'
-        else return 'right'
-      }
-    })
+          // determine position by elimination
+          if (position.left + targetWidth <= width * 0.9) return 'right'
+          else if (position.left >= width * 0.1) return 'left'
+          else if (position.top >= height * 0.4) return 'top'
+          else if (position.top + targetHeight <= height * 0.6) return 'bottom'
+          else return 'right'
+        }
+      })
+    }
 
     window.addEventListener('resize', this.resizeHandler)
   }
