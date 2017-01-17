@@ -21,7 +21,7 @@ export default class SimpleBar {
    * @param {string} props.yLabel - optional
    * @param {boolean} props.animated - default true
    * @param {Function} props.clickHandler - optional
-   * @param {function} props.hoverHandler - optional
+   * @param {Function} props.hoverHandler - optional
    */
   constructor (props) {
     const defaultProps = {
@@ -65,7 +65,6 @@ export default class SimpleBar {
 
     if (props.tooltipFormatter) {
       this.plot.attr('data-title', props.tooltipFormatter)
-      this.tooltipEnabled = true
     }
 
     if (props.clickHandler) {
@@ -145,18 +144,17 @@ export default class SimpleBar {
   mount (element) {
     this.layout.renderTo(element)
 
-    if (this.tooltipEnabled) {
+    if (this.plot.attr('data-title')) {
       $(element).find('.bar-area rect').tooltip({
         animation: false,
-        container: element,
+        container: element.parentNode,
         html: true,
         placement (tip, target) {
           var position = $(target).position()
-
-          var width = element.width()
-          var height = element.height()
-          var targetHeight = $(target).attr('height') ? +$(target).attr('height') : 0
-          var targetWidth = $(target).attr('width') ? +$(target).attr('width') : 0
+          var width = $(element).width()
+          var height = $(element).height()
+          var targetWidth = $(target).width()
+          var targetHeight = $(target).height()
 
           // determine position by elimination
           if (position.left + targetWidth <= width * 0.9) return 'right'

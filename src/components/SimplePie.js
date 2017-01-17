@@ -43,7 +43,6 @@ export default class SimplePie {
 
     if (props.tooltipFormatter) {
       this.plot.attr('data-title', props.tooltipFormatter)
-      this.tooltipEnabled = true
     }
 
     if (props.clickHandler) {
@@ -102,7 +101,7 @@ export default class SimplePie {
     this.relayout()
     this.layout.renderTo(element)
 
-    if (this.plot.labelsEnabled) {
+    if (this.plot.attr('data-title')) {
       const tooltipAnchorSelection = this.plot.foreground()
         .append('circle')
         .attr({r: 3, opacity: 0})
