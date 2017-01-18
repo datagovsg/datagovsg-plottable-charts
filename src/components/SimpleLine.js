@@ -3,8 +3,8 @@ import {getCustomShortScaleFormatter} from '../helpers'
 
 export default class SimpleLine {
   /**
-   * @param {string[]} props.labels - required
-   * @param {number[]} props.valuess - required
+   * @param {number[]} props.x - required
+   * @param {number[]} props.y - required
    * @param {Object} props.xScale - default new Plottable.Scales.Linear()
    * @param {Object} props.yScale - default new Plottable.Scales.Linear()
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
@@ -31,7 +31,7 @@ export default class SimpleLine {
     props = Object.assign(defaultProps, props)
 
     if (props.x.length !== props.y.length) throw new Error()
-    const data = props.y.map((v, i) => ({y: v, x: props.x[i]}))
+    const data = props.y.map((v, i) => ({value: v, label: props.x[i]}))
     this.dataset = new Plottable.Dataset(data)
 
     const xScale = props.xScale || new Plottable.Scales.Linear()
@@ -40,15 +40,15 @@ export default class SimpleLine {
     this.plot = {
       lines: new Plottable.Plots.Line()
         .addDataset(this.dataset)
-        .x(d => d.x, xScale)
-        .y(d => d.y, yScale)
+        .x(d => d.label, xScale)
+        .y(d => d.value, yScale)
         .attr('stroke-width', props.strokeWidth),
       markers: new Plottable.Plots.Scatter()
-          .addDataset(this.dataset)
-          .attr('opacity', 1)
-          .x(d => d.x, xScale)
-          .y(d => d.y, yScale)
-          .size(props.markerSize)
+        .addDataset(this.dataset)
+        .attr('opacity', 1)
+        .x(d => d.label, xScale)
+        .y(d => d.value, yScale)
+        .size(props.markerSize)
     }
 
     if (props.tooltipFormatter) {

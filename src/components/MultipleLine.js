@@ -5,8 +5,8 @@ export default class MultipleLine {
   /**
    * @param {string[]} props.labels - required
    * @param {Object[]} props.traces - required
-   * @param {string[]} props.traces.labels - required
-   * @param {number[]} props.traces.valuess - required
+   * @param {number[]} props.traces.x- required
+   * @param {number[]} props.traces.y - required
    * @param {Object} props.xScale - default new Plottable.Scales.Linear()
    * @param {Object} props.yScale - default new Plottable.Scales.Linear()
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
@@ -37,7 +37,7 @@ export default class MultipleLine {
 
     if (props.labels.length !== props.traces.length) throw new Error()
     this.datasets = props.traces.map((t, i) => {
-      const data = t.y.map((v, i) => ({y: v, x: t.x[i]}))
+      const data = t.y.map((v, i) => ({value: v, label: t.x[i]}))
       return new Plottable.Dataset(data, props.labels[i])
     })
 
@@ -48,15 +48,15 @@ export default class MultipleLine {
     this.plot = {
       lines: new Plottable.Plots.Line()
         .attr('stroke', (d, i, dataset) => dataset.metadata(), colorScale)
-        .x(d => d.x, xScale)
-        .y(d => d.y, yScale)
+        .x(d => d.label, xScale)
+        .y(d => d.value, yScale)
         .attr('stroke-width', props.strokeWidth),
       markers: new Plottable.Plots.Scatter()
-          .attr('opacity', 1)
-          .attr('fill', (d, i, dataset) => dataset.metadata(), colorScale)
-          .x(d => d.x, xScale)
-          .y(d => d.y, yScale)
-          .size(props.markerSize)
+        .attr('opacity', 1)
+        .attr('fill', (d, i, dataset) => dataset.metadata(), colorScale)
+        .x(d => d.label, xScale)
+        .y(d => d.value, yScale)
+        .size(props.markerSize)
     }
 
     this.datasets.forEach(dataset => {
@@ -108,16 +108,14 @@ export default class MultipleLine {
       this.xAxis =
           xScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(xScale, 'bottom')
         : xScale instanceof Plottable.QuantitativeScale ? new Plottable.Axes.Numeric(xScale, 'bottom').formatter(getCustomShortScaleFormatter())
-        : xScale instanceof Plottable.Scales.Category ? new Plottable.Axes.Category(xScale, 'bottom')
-        : null
+        : new Plottable.Axes.Category(xScale, 'bottom')
       if (this.xAxis) _layout.add(this.xAxis, 1, 2)
     }
     if (!props.hideYaxis) {
       this.yAxis =
           yScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(yScale, 'left')
         : yScale instanceof Plottable.QuantitativeScale ? new Plottable.Axes.Numeric(yScale, 'left').formatter(getCustomShortScaleFormatter())
-        : yScale instanceof Plottable.Scales.Category ? new Plottable.Axes.Category(yScale, 'left')
-        : null
+        : new Plottable.Axes.Category(yScale, 'left')
       if (this.yAxis) _layout.add(this.yAxis, 0, 1)
     }
     if (props.xLabel) {

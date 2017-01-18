@@ -8,6 +8,7 @@ export default class SimpleBar {
    * @param {number[]} props.values - required
    * @param {boolean} props.sorted - default false
    * @param {Object} props.scale - default new Plottable.Scales.Linear()
+   * @param {Object} props.categoryScale - default new Plottable.Scales.Category()
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
    * @param {('h'|'v')} props.orientation - default 'h'
    * @param {number} props.baselineValue - default 0
@@ -42,8 +43,8 @@ export default class SimpleBar {
     if (props.sorted === 'd') data.reverse()
     this.dataset = new Plottable.Dataset(data)
 
-    const categoryScale = new Plottable.Scales.Category()
     const scale = props.scale || new Plottable.Scales.Linear()
+    const categoryScale = props.categoryScale || new Plottable.Scales.Category()
     const colorScale = props.colorScale || new Plottable.Scales.Color()
 
     const horizontal = props.orientation === 'h'
@@ -104,16 +105,26 @@ export default class SimpleBar {
       [null, null, null]
     ])
     if (!props.hideXaxis) {
-      this.xAxis = horizontal
-        ? new Plottable.Axes.Numeric(scale, 'bottom').formatter(getCustomShortScaleFormatter())
-        : new Plottable.Axes.Category(categoryScale, 'bottom')
+      if (horizontal) {
+        this.xAxis = new Plottable.Axes.Numeric(scale, 'bottom')
+          .formatter(getCustomShortScaleFormatter())
+      } else {
+        this.xAxis = categoryScale instanceof Plottable.Scales.Time
+          ? new Plottable.Axes.Time(categoryScale, 'bottom')
+          : new Plottable.Axes.Category(categoryScale, 'bottom')
+      }
       if (!horizontal && props.values.length > 7) this.xAxis.formatter(() => '')
       this.layout.add(this.xAxis, 1, 2)
     }
     if (!props.hideYaxis) {
-      this.yAxis = horizontal
-        ? new Plottable.Axes.Category(categoryScale, 'left')
-        : new Plottable.Axes.Numeric(scale, 'left').formatter(getCustomShortScaleFormatter())
+      if (horizontal) {
+        this.yAxis = categoryScale instanceof Plottable.Scales.Time
+          ? new Plottable.Axes.Time(categoryScale, 'left')
+          : new Plottable.Axes.Category(categoryScale, 'left')
+      } else {
+        this.yAxis = new Plottable.Axes.Numeric(scale, 'left')
+          .formatter(getCustomShortScaleFormatter())
+      }
       this.layout.add(this.yAxis, 0, 1)
     }
     if (props.xLabel) {
