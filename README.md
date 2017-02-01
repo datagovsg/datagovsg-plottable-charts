@@ -29,21 +29,9 @@ pie.update(newProps)
 ### Debugging guide
 
 1. Clone the [datagovsg/datagovsg-plottable-charts](https://github.com/datagovsg/datagovsg-plottable-charts) repo
-2. Add a new branch
-3. Edit code
-4. Push your branch to GitHub
-5. npm install your commit
-
-##### Example
-
-```bash
-npm install --save github:datagovsg/datagovsg-plottable-charts#cbaddd65159506d633c4d4aea214e5fc3fea5c76
-```
-
-##### Alternatively
-
-Install local module instead of fetching from remote repo
-
-```bash
-npm install ../datagovsg-plottable-charts
-```
+2. `cd` to the cloned repo
+3. Run `npm install`
+4. Change **main** field in the **package.json** to `"main": "src/index.js"`
+5. Set up a symlink `sudo npm link`
+6. `cd` to your working directory
+7. Run `npm link datagovsg-plottable-charts`
