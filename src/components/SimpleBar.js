@@ -13,11 +13,11 @@ export default class SimpleBar {
    * @param {('h'|'v')} props.orientation - default 'h'
    * @param {number} props.baselineValue - default 0
    * @param {Function} props.labelFormatter - optional
-   * @param {Function} props.tooltipFormatter - optional
    * @param {boolean} props.hideXaxis - default false
    * @param {boolean} props.hideYaxis - default false
    * @param {boolean} props.showXgridlines - default false
    * @param {boolean} props.showYgridlines - default false
+   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
    * @param {string} props.xLabel - optional
    * @param {string} props.yLabel - optional
    * @param {boolean} props.animated - default true
@@ -64,10 +64,6 @@ export default class SimpleBar {
       this.plot.labelFormatter(this.props.labelFormatter).labelsEnabled(true)
     }
 
-    if (props.tooltipFormatter) {
-      this.plot.attr('data-title', props.tooltipFormatter)
-    }
-
     if (props.clickHandler) {
       new Plottable.Interactions.Click()
         .onClick(point => {
@@ -93,8 +89,8 @@ export default class SimpleBar {
     if (props.showXgridlines || props.showYgridlines) {
       const xScale = (props.showXgridlines && horizontal) ? scale : null
       const yScale = (props.showYgridlines && !horizontal) ? scale : null
-      const gridlines = new Plottable.Components.Gridlines(xScale, yScale)
-      plotArea = new Plottable.Components.Group([this.plot, gridlines])
+      this.gridlines = new Plottable.Components.Gridlines(xScale, yScale)
+      plotArea = new Plottable.Components.Group([this.plot, this.gridlines])
     } else {
       plotArea = this.plot
     }
@@ -114,7 +110,7 @@ export default class SimpleBar {
           : new Plottable.Axes.Category(categoryScale, 'bottom')
       }
       if (!horizontal && props.values.length > 7) this.xAxis.formatter(() => '')
-      this.layout.add(this.xAxis, 1, 2)
+      _layout.add(this.xAxis, 1, 2)
     }
     if (!props.hideYaxis) {
       if (horizontal) {
@@ -125,7 +121,7 @@ export default class SimpleBar {
         this.yAxis = new Plottable.Axes.Numeric(scale, 'left')
           .formatter(getCustomShortScaleFormatter())
       }
-      this.layout.add(this.yAxis, 0, 1)
+      _layout.add(this.yAxis, 0, 1)
     }
     if (props.xLabel) {
       _layout.add(new Plottable.Components.AxisLabel(props.xLabel), 2, 2)
@@ -134,14 +130,28 @@ export default class SimpleBar {
       _layout.add(new Plottable.Components.AxisLabel(props.yLabel, -90), 0, 0)
     }
 
-    if (!horizontal && props.values.length > 7) {
-      this.legend = new Plottable.Components.Legend(colorScale)
-        .xAlignment('center')
-        .yAlignment('center')
+    this.legend = new Plottable.Components.Legend(colorScale)
+      .xAlignment('center')
+      .yAlignment('center')
+    if (props.legendPosition === 't') {
+      this.layout = new Plottable.Components.Table([
+        [this.legend.maxEntriesPerRow(Infinity)],
+        [_layout]
+      ]).rowPadding(10)
+    } else if (props.legendPosition === 'r') {
       this.layout = new Plottable.Components.Table([
         [_layout, this.legend]
       ]).columnPadding(10)
-    } else {
+    } else if (props.legendPosition === 'b') {
+      this.layout = new Plottable.Components.Table([
+        [_layout],
+        [this.legend.maxEntriesPerRow(Infinity)]
+      ]).rowPadding(10)
+    } else if (props.legendPosition === 'l') {
+      this.layout = new Plottable.Components.Table([
+        [this.legend, _layout]
+      ]).columnPadding(10)
+    } else if (props.legendPosition === 'none') {
       this.layout = _layout
     }
 
@@ -154,29 +164,6 @@ export default class SimpleBar {
 
   mount (element) {
     this.layout.renderTo(element)
-
-    if (this.plot.attr('data-title')) {
-      $(element).find('.bar-area rect').tooltip({
-        animation: false,
-        container: element.parentNode,
-        html: true,
-        placement (tip, target) {
-          var position = $(target).position()
-          var width = $(element).width()
-          var height = $(element).height()
-          var targetWidth = $(target).width()
-          var targetHeight = $(target).height()
-
-          // determine position by elimination
-          if (position.left + targetWidth <= width * 0.9) return 'right'
-          else if (position.left >= width * 0.1) return 'left'
-          else if (position.top >= height * 0.4) return 'top'
-          else if (position.top + targetHeight <= height * 0.6) return 'bottom'
-          else return 'right'
-        }
-      })
-    }
-
     window.addEventListener('resize', this.resizeHandler)
   }
 

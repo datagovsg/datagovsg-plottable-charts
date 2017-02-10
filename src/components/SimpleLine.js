@@ -76,11 +76,11 @@ export default class SimpleLine {
         .attachTo(this.plot.markers)
     }
 
-    const gridlines = new Plottable.Components.Gridlines(
+    this.gridlines = new Plottable.Components.Gridlines(
       (props.showXgridlines && xScale instanceof Plottable.QuantitativeScale) ? xScale : null,
       (props.showYgridlines && yScale instanceof Plottable.QuantitativeScale) ? yScale : null
     )
-    const plotArea = new Plottable.Components.Group([gridlines, this.plot.lines, this.plot.markers])
+    const plotArea = new Plottable.Components.Group([this.gridlines, this.plot.lines, this.plot.markers])
 
     this.layout = new Plottable.Components.Table([
       [null, null, plotArea],

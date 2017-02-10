@@ -12,11 +12,11 @@ export default class MultipleLine {
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
    * @param {number} props.strokeWidth - default 2
    * @param {number} props.markerSize - default 0
-   * @param {Function} props.tooltipFormatter - optional
    * @param {boolean} props.hideXaxis - default false
    * @param {boolean} props.hideYaxis - default false
    * @param {boolean} props.showXgridlines - default false
    * @param {boolean} props.showYgridlines - default false
+   * @param {('v'|'h'|'all'|'none')} props.guideLine - default 'none'
    * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
    * @param {string} props.xLabel - optional
    * @param {string} props.yLabel - optional
@@ -31,6 +31,7 @@ export default class MultipleLine {
       hideYaxis: false,
       showXgridlines: false,
       showYgridlines: false,
+      guideLine: 'none',
       legendPosition: 'r'
     }
     props = Object.assign(defaultProps, props)
@@ -64,10 +65,6 @@ export default class MultipleLine {
       this.plot.markers.addDataset(dataset)
     })
 
-    if (props.tooltipFormatter) {
-      this.plot.markers.attr('data-title', props.tooltipFormatter)
-    }
-
     if (props.clickHandler) {
       new Plottable.Interactions.Click()
         .onClick(point => {
@@ -89,11 +86,49 @@ export default class MultipleLine {
         .attachTo(this.plot.markers)
     }
 
-    const gridlines = new Plottable.Components.Gridlines(
+    this.gridlines = new Plottable.Components.Gridlines(
       (props.showXgridlines && xScale instanceof Plottable.QuantitativeScale) ? xScale : null,
       (props.showYgridlines && yScale instanceof Plottable.QuantitativeScale) ? yScale : null
     )
-    const plotArea = new Plottable.Components.Group([gridlines, this.plot.lines, this.plot.markers])
+
+    this.guideLine = {horizontal: null, vertical: null}
+
+    if (props.guideLine === 'v' || props.guideLine === 'all') {
+      this.guideLine.vertical = new Plottable.Components.GuideLineLayer(
+        Plottable.Components.GuideLineLayer.ORIENTATION_VERTICAL).scale(xScale)
+      new Plottable.Interactions.Pointer()
+        .onPointerMove(point => {
+          const target = this.plot.markers.entityNearest(point)
+          if (target) this.guideLine.vertical.value(target.datum.label)
+          else this.guideLine.vertical.pixelPosition(-999)
+        })
+        .onPointerExit(point => {
+          this.guideLine.vertical.pixelPosition(-999)
+        })
+        .attachTo(this.plot.markers)
+    }
+    if (props.guideLine === 'h' || props.guideLine === 'all') {
+      this.guideLine.horizontal = new Plottable.Components.GuideLineLayer(
+        Plottable.Components.GuideLineLayer.ORIENTATION_HORIZONTAL).scale(yScale)
+      new Plottable.Interactions.Pointer()
+        .onPointerMove(point => {
+          const target = this.plot.markers.entityNearest(point)
+          if (target) this.guideLine.horizontal.value(target.datum.value)
+          else this.guideLine.horizontal.pixelPosition(-999)
+        })
+        .onPointerExit(point => {
+          this.guideLine.horizontal.pixelPosition(-999)
+        })
+        .attachTo(this.plot.markers)
+    }
+
+    const plotArea = new Plottable.Components.Group([
+      this.gridlines,
+      this.guideLine.horizontal,
+      this.guideLine.vertical,
+      this.plot.lines,
+      this.plot.markers
+    ])
 
     this.legend = new Plottable.Components.Legend(colorScale)
       .xAlignment('center')
@@ -105,18 +140,26 @@ export default class MultipleLine {
       [null, null, null]
     ])
     if (!props.hideXaxis) {
-      this.xAxis =
-          xScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(xScale, 'bottom')
-        : xScale instanceof Plottable.QuantitativeScale ? new Plottable.Axes.Numeric(xScale, 'bottom').formatter(getCustomShortScaleFormatter())
-        : new Plottable.Axes.Category(xScale, 'bottom')
-      if (this.xAxis) _layout.add(this.xAxis, 1, 2)
+      if (xScale instanceof Plottable.Scales.Time) {
+        this.xAxis = new Plottable.Axes.Time(xScale, 'bottom')
+      } else if (xScale instanceof Plottable.QuantitativeScale) {
+        this.xAxis = new Plottable.Axes.Numeric(xScale, 'bottom')
+          .formatter(getCustomShortScaleFormatter())
+      } else {
+        this.xAxis = new Plottable.Axes.Category(xScale, 'bottom')
+      }
+      _layout.add(this.xAxis, 1, 2)
     }
     if (!props.hideYaxis) {
-      this.yAxis =
-          yScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(yScale, 'left')
-        : yScale instanceof Plottable.QuantitativeScale ? new Plottable.Axes.Numeric(yScale, 'left').formatter(getCustomShortScaleFormatter())
-        : new Plottable.Axes.Category(yScale, 'left')
-      if (this.yAxis) _layout.add(this.yAxis, 0, 1)
+      if (yScale instanceof Plottable.Scales.Time) {
+        this.yAxis = new Plottable.Axes.Time(yScale, 'left')
+      } else if (yScale instanceof Plottable.QuantitativeScale) {
+        this.yAxis = new Plottable.Axes.Numeric(yScale, 'left')
+          .formatter(getCustomShortScaleFormatter())
+      } else {
+        this.yAxis = new Plottable.Axes.Category(yScale, 'left')
+      }
+      _layout.add(this.yAxis, 0, 1)
     }
     if (props.xLabel) {
       _layout.add(new Plottable.Components.AxisLabel(props.xLabel), 2, 2)
@@ -156,29 +199,6 @@ export default class MultipleLine {
 
   mount (element) {
     this.layout.renderTo(element)
-
-    if (this.plot.markers.attr('data-title')) {
-      $(element).find('.render-area .symbol').tooltip({
-        animation: false,
-        container: element.parentNode,
-        html: true,
-        placement (tip, target) {
-          var position = $(target).position()
-          var width = $(element).width()
-          var height = $(element).height()
-          var targetWidth = $(target).width()
-          var targetHeight = $(target).height()
-
-          // determine position by elimination
-          if (position.left + targetWidth <= width * 0.9) return 'right'
-          else if (position.left >= width * 0.1) return 'left'
-          else if (position.top >= height * 0.4) return 'top'
-          else if (position.top + targetHeight <= height * 0.6) return 'bottom'
-          else return 'right'
-        }
-      })
-    }
-
     window.addEventListener('resize', this.resizeHandler)
   }
 

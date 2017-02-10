@@ -13,12 +13,11 @@ export default class GroupedBar {
    * @param {('h'|'v')} props.orientation - default 'h'
    * @param {number} props.baselineValue - default 0
    * @param {Function} props.labelFormatter - optional
-   * @param {Function} props.tooltipFormatter - optional
    * @param {boolean} props.hideXaxis - default false
    * @param {boolean} props.hideYaxis - default false
    * @param {boolean} props.showXgridlines - default false
    * @param {boolean} props.showYgridlines - default false
-   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
+   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'none'
    * @param {string} props.xLabel - optional
    * @param {string} props.yLabel - optional
    * @param {boolean} props.animated - default true
@@ -67,10 +66,6 @@ export default class GroupedBar {
       this.plot.labelFormatter(props.labelFormatter).labelsEnabled(true)
     }
 
-    if (props.tooltipFormatter) {
-      this.plot.attr('data-title', props.tooltipFormatter)
-    }
-
     if (props.clickHandler) {
       new Plottable.Interactions.Click()
         .onClick(point => {
@@ -96,8 +91,8 @@ export default class GroupedBar {
     if (props.showXgridlines || props.showYgridlines) {
       const xScale = (props.showXgridlines && horizontal) ? scale : null
       const yScale = (props.showYgridlines && !horizontal) ? scale : null
-      const gridlines = new Plottable.Components.Gridlines(xScale, yScale)
-      plotArea = new Plottable.Components.Group([gridlines, this.plot])
+      this.gridlines = new Plottable.Components.Gridlines(xScale, yScale)
+      plotArea = new Plottable.Components.Group([this.gridlines, this.plot])
     } else {
       plotArea = this.plot
     }
@@ -170,29 +165,6 @@ export default class GroupedBar {
 
   mount (element) {
     this.layout.renderTo(element)
-
-    if (this.plot.attr('data-title')) {
-      $(element).find('.bar-area rect').tooltip({
-        animation: false,
-        container: element.parentNode,
-        html: true,
-        placement (tip, target) {
-          var position = $(target).position()
-          var width = $(element).width()
-          var height = $(element).height()
-          var targetWidth = $(target).width()
-          var targetHeight = $(target).height()
-
-          // determine position by elimination
-          if (position.left + targetWidth <= width * 0.9) return 'right'
-          else if (position.left >= width * 0.1) return 'left'
-          else if (position.top >= height * 0.4) return 'top'
-          else if (position.top + targetHeight <= height * 0.6) return 'bottom'
-          else return 'right'
-        }
-      })
-    }
-
     window.addEventListener('resize', this.resizeHandler)
   }
 
