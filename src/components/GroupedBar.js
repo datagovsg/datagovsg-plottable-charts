@@ -36,9 +36,11 @@ export default class GroupedBar {
       animated: true
     }
     props = Object.assign(defaultProps, props)
+    this.options = props
 
     if (props.labels.length !== props.traces.length) throw new Error()
     this.datasets = props.traces.map((t, i) => {
+      if (t.labels.length !== t.values.length) throw new Error()
       const data = t.values.map((v, i) => ({value: v, label: t.labels[i]}))
       return new Plottable.Dataset(data, props.labels[i])
     })
@@ -161,11 +163,13 @@ export default class GroupedBar {
 
   resizeHandler () {
     this.layout.redraw()
+    if (this.onResize) this.onResize()
   }
 
   mount (element) {
     this.layout.renderTo(element)
     window.addEventListener('resize', this.resizeHandler)
+    if (this.onMount) this.onMount(element)
   }
 
   unmount () {
@@ -175,12 +179,15 @@ export default class GroupedBar {
   update (nextProps) {
     if (nextProps.labels.length !== nextProps.traces.length) throw new Error()
     this.datasets = nextProps.traces.map((t, i) => {
+      if (t.labels.length !== t.values.length) throw new Error()
       const data = t.values.map((v, i) => ({value: v, label: t.labels[i]}))
       return new Plottable.Dataset(data).metadata(nextProps.labels[i])
     })
     this.plot.datasets(this.datasets)
-    const colorScale = nextProps.colorScale || this.colorScale
-    this.plot.attr('fill', (d, i, dataset) => dataset.metadata(), colorScale)
-    this.legend.colorScale(colorScale)
+    Object.assign(this.options, {
+      labels: nextProps.labels,
+      traces: nextProps.traces
+    })
+    if (this.onUpdate) this.onUpdate(nextProps)
   }
 }

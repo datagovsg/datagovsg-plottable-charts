@@ -16,7 +16,7 @@ export default class MultipleLine {
    * @param {boolean} props.hideYaxis - default false
    * @param {boolean} props.showXgridlines - default false
    * @param {boolean} props.showYgridlines - default false
-   * @param {('v'|'h'|'all'|'none')} props.guideLine - default 'none'
+   * @param {('v'|'h'|'vh'|'hv'|'none')} props.guideLine - default 'none'
    * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
    * @param {string} props.xLabel - optional
    * @param {string} props.yLabel - optional
@@ -35,9 +35,11 @@ export default class MultipleLine {
       legendPosition: 'r'
     }
     props = Object.assign(defaultProps, props)
+    this.options = props
 
     if (props.labels.length !== props.traces.length) throw new Error()
     this.datasets = props.traces.map((t, i) => {
+      if (t.x.length !== t.y.length) throw new Error()
       const data = t.y.map((v, i) => ({value: v, label: t.x[i]}))
       return new Plottable.Dataset(data, props.labels[i])
     })
@@ -93,9 +95,10 @@ export default class MultipleLine {
 
     this.guideLine = {horizontal: null, vertical: null}
 
-    if (props.guideLine === 'v' || props.guideLine === 'all') {
+    if (['v', 'vh', 'hv'].indexOf(props.guideLine) > -1) {
       this.guideLine.vertical = new Plottable.Components.GuideLineLayer(
-        Plottable.Components.GuideLineLayer.ORIENTATION_VERTICAL).scale(xScale)
+        Plottable.Components.GuideLineLayer.ORIENTATION_VERTICAL
+      ).scale(xScale).pixelPosition(-999)
       new Plottable.Interactions.Pointer()
         .onPointerMove(point => {
           const target = this.plot.markers.entityNearest(point)
@@ -107,9 +110,10 @@ export default class MultipleLine {
         })
         .attachTo(this.plot.markers)
     }
-    if (props.guideLine === 'h' || props.guideLine === 'all') {
+    if (['h', 'vh', 'hv'].indexOf(props.guideLine) > -1) {
       this.guideLine.horizontal = new Plottable.Components.GuideLineLayer(
-        Plottable.Components.GuideLineLayer.ORIENTATION_HORIZONTAL).scale(yScale)
+        Plottable.Components.GuideLineLayer.ORIENTATION_HORIZONTAL
+      ).scale(yScale).pixelPosition(-999)
       new Plottable.Interactions.Pointer()
         .onPointerMove(point => {
           const target = this.plot.markers.entityNearest(point)
@@ -195,11 +199,13 @@ export default class MultipleLine {
 
   resizeHandler () {
     this.layout.redraw()
+    if (this.onResize) this.onResize()
   }
 
   mount (element) {
     this.layout.renderTo(element)
     window.addEventListener('resize', this.resizeHandler)
+    if (this.onMount) this.onMount(element)
   }
 
   unmount () {
@@ -208,13 +214,15 @@ export default class MultipleLine {
 
   update (nextProps) {
     if (nextProps.labels.length !== nextProps.traces.length) throw new Error()
-    this.datasets = nextProps.trace.map((t, i) => {
-      const data = t.y.map((v, i) => ({y: v, x: t.x[i]}))
+    this.datasets = nextProps.traces.map((t, i) => {
+      if (t.x.length !== t.y.length) throw new Error()
+      const data = t.y.map((v, i) => ({value: v, label: t.x[i]}))
       return new Plottable.Dataset(data).metadata(nextProps.labels[i])
     })
-    const colorScale = nextProps.colorScale || new Plottable.Scales.Color()
-    this.plot.lines.attr('stroke', (d, i, dataset) => dataset.metadata(), colorScale)
-    this.plot.markers.attr('fill', (d, i, dataset) => dataset.metadata(), colorScale)
-    this.legend.colorScale(colorScale)
+    Object.assign(this.options, {
+      labels: nextProps.labels,
+      traces: nextProps.traces
+    })
+    if (this.onUpdate) this.onUpdate(nextProps)
   }
 }

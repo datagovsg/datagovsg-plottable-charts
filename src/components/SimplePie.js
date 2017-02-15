@@ -1,32 +1,41 @@
+import sortBy from 'lodash/sortBy'
 import throttle from 'lodash/throttle'
 
 export default class SimplePie {
   /**
    * @param {string[]} props.labels - required
    * @param {number[]} props.valuess - required
+   * @param {boolean} props.sorted - default false
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
    * @param {number} props.innerRadius - default 0
+   * @param {number} props.outerRadius - default min(plot.height, plot.width) / 2
    * @param {Function} props.labelFormatter - optional
-   * @param {Function} props.tooltipFormatter - optional
-   * @param {string} props.hideLabel - default false
+   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
    * @param {boolean} props.animated - default true
    * @param {Function} props.clickHandler - optional
    * @param {function} props.hoverHandler - optional
    */
   constructor (props) {
     const defaultProps = {
+      sorted: false,
       innerRadius: 0,
-      hideLegend: false,
+      legendPosition: 'none',
       animated: true
     }
     props = Object.assign(defaultProps, props)
+    this.options = props
 
     if (props.labels.length !== props.values.length) throw new Error()
-    const data = props.values.map((v, i) => ({value: v, label: props.labels[i]}))
+    let data = props.values.map((v, i) => ({value: v, label: props.labels[i]}))
+    if (props.sorted) data = sortBy(data, 'value')
+    if (props.sorted === 'd') data.reverse()
     this.dataset = new Plottable.Dataset(data)
 
-    const scale = new Plottable.Scales.Linear()
+    const total = data.reduce((sum, d) => sum + d.value, 0)
+    const scale = new Plottable.Scales.Linear().domain([0, total])
     const colorScale = props.colorScale || new Plottable.Scales.Color()
+
+    props.outerRadius = props.outerRadius || (d => Math.min(this.plot.width(), this.plot.height()) / 2)
 
     this.plot = new Plottable.Plots.Pie()
       .addClass('simple-pie-plot')
@@ -35,14 +44,11 @@ export default class SimplePie {
       .attr('fill', d => d.label, colorScale)
       .labelsEnabled(false)
       .innerRadius(props.innerRadius)
+      .outerRadius(props.outerRadius)
       .animated(props.animated)
 
     if (props.labelFormatter) {
       this.plot.labelFormatter(props.labelFormatter).labelsEnabled(true)
-    }
-
-    if (props.tooltipFormatter) {
-      this.plot.attr('data-title', props.tooltipFormatter)
     }
 
     if (props.clickHandler) {
@@ -66,78 +72,43 @@ export default class SimplePie {
         .attachTo(this.plot)
     }
 
-    this.legend = props.hideLegend ? null : (
-      new Plottable.Components.Legend(colorScale)
-        .addClass('simple-pie-legend')
-        .xAlignment('center')
-        .yAlignment('center')
-    )
-
-    this.layout = new Plottable.Components.Table([
-      [this.plot, null],
-      [null]
-    ]).rowPadding(20)
+    this.legend = new Plottable.Components.Legend(colorScale)
+      .xAlignment('center')
+      .yAlignment('center')
+    if (props.legendPosition === 't') {
+      this.layout = new Plottable.Components.Table([
+        [this.legend.maxEntriesPerRow(Infinity)],
+        [this.plot]
+      ]).rowPadding(10)
+    } else if (props.legendPosition === 'r') {
+      this.layout = new Plottable.Components.Table([
+        [this.plot, this.legend]
+      ]).columnPadding(10)
+    } else if (props.legendPosition === 'b') {
+      this.layout = new Plottable.Components.Table([
+        [this.plot],
+        [this.legend.maxEntriesPerRow(Infinity)]
+      ]).rowPadding(10)
+    } else if (props.legendPosition === 'l') {
+      this.layout = new Plottable.Components.Table([
+        [this.legend, this.plot]
+      ]).columnPadding(10)
+    } else if (props.legendPosition === 'none') {
+      this.layout = this.plot
+    }
 
     this.resizeHandler = throttle(this.resizeHandler, 200).bind(this)
   }
 
   resizeHandler () {
-    this.relayout()
     this.layout.redraw()
+    if (this.onResize) this.onResize()
   }
 
   mount (element) {
-    this.relayout = () => {
-      if (!this.legend) return
-      if (this.layout.has(this.legend)) this.layout.remove(this.legend)
-      const width = element.width.baseVal.value
-      const height = element.height.baseVal.value
-      if (width < height * 1.5) {
-        this.layout.add(this.legend, 1, 0)
-      } else {
-        this.layout.add(this.legend, 0, 1)
-      }
-    }
-    this.relayout()
     this.layout.renderTo(element)
-
-    if (this.plot.attr('data-title')) {
-      const tooltipAnchorSelection = this.plot.foreground()
-        .append('circle')
-        .attr({r: 3, opacity: 0})
-      const tooltipAnchor = $(tooltipAnchorSelection.node())
-      tooltipAnchor.tooltip({
-        animation: false,
-        container: 'body',
-        placement: 'top',
-        title: 'text',
-        trigger: 'manual'
-      })
-      new Plottable.Interactions.Pointer()
-        .onPointerMove(point => {
-          const target = this.plot.entitiesAt(point)[0]
-          if (target) {
-            const textLabel = this.plot.content()
-              .selectAll('.label-area > g').filter((d, i) => i === target.index)
-            if (textLabel.size() && textLabel.style('visibility') !== 'hidden') {
-              tooltipAnchor.tooltip('hide')
-              return
-            }
-            tooltipAnchorSelection.attr({
-              cx: target.position.x,
-              cy: target.position.y,
-              'data-original-title': 'Value: ' + this.plot.labelFormatter()(target.datum.value)
-            })
-            tooltipAnchor.tooltip('show')
-          }
-        })
-        .onPointerExit(point => {
-          tooltipAnchor.tooltip('hide')
-        })
-        .attachTo(this.plot)
-    }
-
     window.addEventListener('resize', this.resizeHandler)
+    if (this.onMount) this.onMount(element)
   }
 
   unmount () {
@@ -146,11 +117,17 @@ export default class SimplePie {
 
   update (nextProps) {
     if (nextProps.labels.length !== nextProps.values.length) throw new Error()
-    const data = nextProps.values
+    let data = nextProps.values
       .map((v, i) => ({value: v, label: nextProps.labels[i]}))
+    if (this.options.sorted) data = sortBy(data, 'value')
+    if (this.options.sorted === 'd') data.reverse()
+    const total = data.reduce((sum, d) => sum + d.value, 0)
+    this.plot.sectorValue().scale.domain([0, total])
     this.dataset.data(data)
-    const colorScale = nextProps.colorScale || new Plottable.Scales.Color()
-    this.plot.attr('fill', d => d.label, colorScale)
-    this.legend.colorScale(colorScale)
+    Object.assign(this.options, {
+      labels: nextProps.labels,
+      values: nextProps.values
+    })
+    if (this.onUpdate) this.onUpdate(nextProps)
   }
 }

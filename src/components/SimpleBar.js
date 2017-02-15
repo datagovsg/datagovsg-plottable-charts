@@ -9,7 +9,7 @@ export default class SimpleBar {
    * @param {boolean} props.sorted - default false
    * @param {Object} props.scale - default new Plottable.Scales.Linear()
    * @param {Object} props.categoryScale - default new Plottable.Scales.Category()
-   * @param {Object} props.colorScale - default new Plottable.Scales.Color()
+   * @param {String} props.fill - optional
    * @param {('h'|'v')} props.orientation - default 'h'
    * @param {number} props.baselineValue - default 0
    * @param {Function} props.labelFormatter - optional
@@ -26,16 +26,18 @@ export default class SimpleBar {
    */
   constructor (props) {
     const defaultProps = {
+      sorted: false,
       orientation: 'v',
       baselineValue: 0,
-      showPercent: false,
       hideXaxis: false,
       hideYaxis: false,
       showXgridlines: false,
       showYgridlines: false,
+      legendPosition: 'none',
       animated: true
     }
     props = Object.assign(defaultProps, props)
+    this.options = props
 
     if (props.labels.length !== props.values.length) throw new Error()
     let data = props.values.map((v, i) => ({value: v, label: props.labels[i]}))
@@ -45,7 +47,6 @@ export default class SimpleBar {
 
     const scale = props.scale || new Plottable.Scales.Linear()
     const categoryScale = props.categoryScale || new Plottable.Scales.Category()
-    const colorScale = props.colorScale || new Plottable.Scales.Color()
 
     const horizontal = props.orientation === 'h'
     const plotType = horizontal
@@ -53,7 +54,7 @@ export default class SimpleBar {
       : Plottable.Plots.Bar.ORIENTATION_VERTICAL
     this.plot = new Plottable.Plots.Bar(plotType)
       .addDataset(this.dataset)
-      .attr('fill', d => d.label, colorScale)
+      .attr('fill', props.fill)
       .labelsEnabled(false)
       .animated(props.animated)
       .baselineValue(props.baselineValue)
@@ -130,41 +131,20 @@ export default class SimpleBar {
       _layout.add(new Plottable.Components.AxisLabel(props.yLabel, -90), 0, 0)
     }
 
-    this.legend = new Plottable.Components.Legend(colorScale)
-      .xAlignment('center')
-      .yAlignment('center')
-    if (props.legendPosition === 't') {
-      this.layout = new Plottable.Components.Table([
-        [this.legend.maxEntriesPerRow(Infinity)],
-        [_layout]
-      ]).rowPadding(10)
-    } else if (props.legendPosition === 'r') {
-      this.layout = new Plottable.Components.Table([
-        [_layout, this.legend]
-      ]).columnPadding(10)
-    } else if (props.legendPosition === 'b') {
-      this.layout = new Plottable.Components.Table([
-        [_layout],
-        [this.legend.maxEntriesPerRow(Infinity)]
-      ]).rowPadding(10)
-    } else if (props.legendPosition === 'l') {
-      this.layout = new Plottable.Components.Table([
-        [this.legend, _layout]
-      ]).columnPadding(10)
-    } else if (props.legendPosition === 'none') {
-      this.layout = _layout
-    }
+    this.layout = _layout
 
     this.resizeHandler = throttle(this.resizeHandler, 200).bind(this)
   }
 
   resizeHandler () {
     this.layout.redraw()
+    if (this.onResize) this.onResize()
   }
 
   mount (element) {
     this.layout.renderTo(element)
     window.addEventListener('resize', this.resizeHandler)
+    if (this.onMount) this.onMount(element)
   }
 
   unmount () {
@@ -175,10 +155,13 @@ export default class SimpleBar {
     if (nextProps.labels.length !== nextProps.values.length) throw new Error()
     let data = nextProps.values
       .map((v, i) => ({value: v, label: nextProps.labels[i]}))
-    if (nextProps.sorted) data = sortBy(data, 'value')
-    if (nextProps.sorted === 'd') data.reverse()
+    if (this.options.sorted) data = sortBy(data, 'value')
+    if (this.options.sorted === 'd') data.reverse()
     this.dataset.data(data)
-    const colorScale = nextProps.colorScale || new Plottable.Scales.Color()
-    this.plot.attr('fill', d => d.label, colorScale)
+    Object.assign(this.options, {
+      labels: nextProps.labels,
+      values: nextProps.values
+    })
+    if (this.onUpdate) this.onUpdate(nextProps)
   }
 }
