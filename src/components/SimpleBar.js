@@ -1,8 +1,8 @@
+import Chart from './Chart'
 import sortBy from 'lodash/sortBy'
-import throttle from 'lodash/throttle'
 import {getCustomShortScaleFormatter} from '../helpers'
 
-export default class SimpleBar {
+export default class SimpleBar extends Chart {
   /**
    * @param {string[]} props.labels - required
    * @param {number[]} props.values - required
@@ -25,7 +25,8 @@ export default class SimpleBar {
    * @param {Function} props.hoverHandler - optional
    */
   constructor (props) {
-    const defaultProps = {
+    super()
+    this.options = {
       sorted: false,
       orientation: 'v',
       baselineValue: 0,
@@ -36,8 +37,7 @@ export default class SimpleBar {
       legendPosition: 'none',
       animated: true
     }
-    props = Object.assign(defaultProps, props)
-    this.options = props
+    props = Object.assign(this.options, props)
 
     if (props.labels.length !== props.values.length) throw new Error()
     let data = props.values.map((v, i) => ({value: v, label: props.labels[i]}))
@@ -132,23 +132,6 @@ export default class SimpleBar {
     }
 
     this.layout = _layout
-
-    this.resizeHandler = throttle(this.resizeHandler, 200).bind(this)
-  }
-
-  resizeHandler () {
-    this.layout.redraw()
-    if (this.onResize) this.onResize()
-  }
-
-  mount (element) {
-    this.layout.renderTo(element)
-    window.addEventListener('resize', this.resizeHandler)
-    if (this.onMount) this.onMount(element)
-  }
-
-  unmount () {
-    window.removeEventListener('resize', this.resizeHandler)
   }
 
   update (nextProps) {
@@ -162,6 +145,6 @@ export default class SimpleBar {
       labels: nextProps.labels,
       values: nextProps.values
     })
-    if (this.onUpdate) this.onUpdate(nextProps)
+    this.onUpdate(nextProps)
   }
 }

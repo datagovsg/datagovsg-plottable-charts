@@ -1,7 +1,7 @@
+import Chart from './Chart'
 import sortBy from 'lodash/sortBy'
-import throttle from 'lodash/throttle'
 
-export default class SimplePie {
+export default class SimplePie extends Chart {
   /**
    * @param {string[]} props.labels - required
    * @param {number[]} props.valuess - required
@@ -16,14 +16,14 @@ export default class SimplePie {
    * @param {function} props.hoverHandler - optional
    */
   constructor (props) {
-    const defaultProps = {
+    super()
+    this.options = {
       sorted: false,
       innerRadius: 0,
       legendPosition: 'none',
       animated: true
     }
-    props = Object.assign(defaultProps, props)
-    this.options = props
+    props = Object.assign(this.options, props)
 
     if (props.labels.length !== props.values.length) throw new Error()
     let data = props.values.map((v, i) => ({value: v, label: props.labels[i]}))
@@ -96,23 +96,6 @@ export default class SimplePie {
     } else if (props.legendPosition === 'none') {
       this.layout = this.plot
     }
-
-    this.resizeHandler = throttle(this.resizeHandler, 200).bind(this)
-  }
-
-  resizeHandler () {
-    this.layout.redraw()
-    if (this.onResize) this.onResize()
-  }
-
-  mount (element) {
-    this.layout.renderTo(element)
-    window.addEventListener('resize', this.resizeHandler)
-    if (this.onMount) this.onMount(element)
-  }
-
-  unmount () {
-    window.removeEventListener('resize', this.resizeHandler)
   }
 
   update (nextProps) {
@@ -128,6 +111,6 @@ export default class SimplePie {
       labels: nextProps.labels,
       values: nextProps.values
     })
-    if (this.onUpdate) this.onUpdate(nextProps)
+    this.onUpdate(nextProps)
   }
 }

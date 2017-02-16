@@ -1,7 +1,7 @@
-import throttle from 'lodash/throttle'
+import Chart from './Chart'
 import {getCustomShortScaleFormatter} from '../helpers'
 
-export default class GroupedBar {
+export default class GroupedBar extends Chart {
   /**
    * @param {string[]} props.labels - required
    * @param {Object[]} props.traces - required
@@ -25,7 +25,8 @@ export default class GroupedBar {
    * @param {Function} props.hoverHandler - optional
    */
   constructor (props) {
-    const defaultProps = {
+    super()
+    this.options = {
       orientation: 'v',
       baselineValue: 0,
       hideXaxis: false,
@@ -35,8 +36,7 @@ export default class GroupedBar {
       legendPosition: 'r',
       animated: true
     }
-    props = Object.assign(defaultProps, props)
-    this.options = props
+    props = Object.assign(this.options, props)
 
     if (props.labels.length !== props.traces.length) throw new Error()
     this.datasets = props.traces.map((t, i) => {
@@ -157,23 +157,6 @@ export default class GroupedBar {
     } else if (props.legendPosition === 'none') {
       this.layout = _layout
     }
-
-    this.resizeHandler = throttle(this.resizeHandler, 200).bind(this)
-  }
-
-  resizeHandler () {
-    this.layout.redraw()
-    if (this.onResize) this.onResize()
-  }
-
-  mount (element) {
-    this.layout.renderTo(element)
-    window.addEventListener('resize', this.resizeHandler)
-    if (this.onMount) this.onMount(element)
-  }
-
-  unmount () {
-    window.removeEventListener('resize', this.resizeHandler)
   }
 
   update (nextProps) {
@@ -188,6 +171,6 @@ export default class GroupedBar {
       labels: nextProps.labels,
       traces: nextProps.traces
     })
-    if (this.onUpdate) this.onUpdate(nextProps)
+    this.onUpdate(nextProps)
   }
 }
