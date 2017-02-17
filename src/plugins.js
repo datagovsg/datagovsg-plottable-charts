@@ -161,22 +161,13 @@ export function setupPopoverOnGuideLine (component, props) {
  */
 export function setupShadowWithPopover (component, props) {
   const plotArea = component.plot.parent()
+  const scale = component.plot.orientation() === 'vertical'
+    ? component.plot.x().scale : component.plot.y().scale
 
   function getDomain () {
-    const labels = new Set()
-    component.datasets.forEach(dataset => {
-      dataset.data().forEach(d => {
-        labels.add(d.label)
-      })
-    })
-    return [...labels].map(label => ({label}))
+    return scale.domain().map(label => ({label}))
   }
-
   const dataset = new Plottable.Dataset()
-  dataset.data(getDomain())
-  component.onUpdate = function (nextProps) {
-    dataset.data(getDomain)
-  }
 
   const shadow = new Plottable.Plots.Rectangle()
     .addDataset(dataset)
@@ -186,14 +177,12 @@ export function setupShadowWithPopover (component, props) {
     .attr('opacity', 0)
 
   if (component.plot.orientation() === 'vertical') {
-    const scale = component.plot.x().scale
     shadow
       .x(d => scale.scale(d.label) - scale.stepWidth() / 2)
       .x2(d => scale.scale(d.label) + scale.stepWidth() / 2)
       .y(d => 0)
       .y2(d => shadow.height())
   } else {
-    const scale = component.plot.y().scale
     shadow
       .x(d => 0)
       .x2(d => shadow.width())
@@ -221,6 +210,12 @@ export function setupShadowWithPopover (component, props) {
     .attachTo(shadow)
 
   component.onMount = function (element) {
+    dataset.data(getDomain())
+    scale.onUpdate(() => {
+      dataset.data(getDomain())
+    })
+    shadow.renderImmediately()
+
     if (this.plot.orientation() === 'vertical') {
       $(element).find('.rectangle-plot .render-area rect').popover({
         animation: false,
@@ -264,6 +259,8 @@ export function setupOuterLabel (component, props) {
     const maxRadius = Math.min(component.plot.width(), component.plot.height()) / 2
     return maxRadius * 0.8
   })
+
+  component.plot._clipPathEnabled = false
 
   function drawLabel (component) {
     const radius = Math.min(component.plot.width(), component.plot.height()) / 2

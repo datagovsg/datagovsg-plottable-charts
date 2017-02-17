@@ -3,6 +3,10 @@ import throttle from 'lodash/throttle'
 export default class Chart {
   constructor () {
     this.resizeHandler = throttle(this.resizeHandler, 200).bind(this)
+    this._onMount = []
+    this._onUnmount = []
+    this._onUpdate = []
+    this._onResize = []
   }
 
   resizeHandler () {
@@ -31,46 +35,42 @@ export default class Chart {
   }
 
   set onMount (cb) {
-    this._onMount = this._onMount || []
     this._onMount.push(cb)
   }
 
   get onUnmount () {
     return function (element) {
       this._onUnmount.forEach(cb => {
-        cb.call(this, element)
+        cb.call(this)
       })
     }
   }
 
   set onUnmount (cb) {
-    this._onUnmount = this._onUnmount || []
     this._onUnmount.push(cb)
   }
 
   get onUpdate () {
-    return function (element) {
+    return function (nextProps) {
       this._onUpdate.forEach(cb => {
-        cb.call(this, element)
+        cb.call(this, nextProps)
       })
     }
   }
 
   set onUpdate (cb) {
-    this._onUpdate = this._onUpdate || []
     this._onUpdate.push(cb)
   }
 
   get onResize () {
     return function (element) {
       this._onResize.forEach(cb => {
-        cb.call(this, element)
+        cb.call(this)
       })
     }
   }
 
   set onResize (cb) {
-    this._onResize = this._onResize || []
     this._onResize.push(cb)
   }
 }

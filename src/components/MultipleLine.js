@@ -98,30 +98,38 @@ export default class MultipleLine extends Chart {
     if (['v', 'vh', 'hv'].indexOf(props.guideLine) > -1) {
       this.guideLine.vertical = new Plottable.Components.GuideLineLayer(
         Plottable.Components.GuideLineLayer.ORIENTATION_VERTICAL
-      ).scale(xScale).pixelPosition(-999)
+      ).scale(xScale)
       new Plottable.Interactions.Pointer()
         .onPointerMove(point => {
           const target = this.plot.markers.entityNearest(point)
-          if (target) this.guideLine.vertical.value(target.datum.label)
-          else this.guideLine.vertical.pixelPosition(-999)
+          if (target) {
+            this.guideLine.vertical.value(target.datum.label)
+            this.guideLine.vertical.content().style('visibility', 'visible')
+          } else {
+            this.guideLine.vertical.content().style('visibility', 'hidden')
+          }
         })
         .onPointerExit(point => {
-          this.guideLine.vertical.pixelPosition(-999)
+          this.guideLine.vertical.content().style('visibility', 'hidden')
         })
         .attachTo(this.plot.markers)
     }
     if (['h', 'vh', 'hv'].indexOf(props.guideLine) > -1) {
       this.guideLine.horizontal = new Plottable.Components.GuideLineLayer(
         Plottable.Components.GuideLineLayer.ORIENTATION_HORIZONTAL
-      ).scale(yScale).pixelPosition(-999)
+      ).scale(yScale)
       new Plottable.Interactions.Pointer()
         .onPointerMove(point => {
           const target = this.plot.markers.entityNearest(point)
-          if (target) this.guideLine.horizontal.value(target.datum.value)
-          else this.guideLine.horizontal.pixelPosition(-999)
+          if (target) {
+            this.guideLine.horizontal.value(target.datum.value)
+            this.guideLine.horizontal.content().style('visibility', 'visible')
+          } else {
+            this.guideLine.horizontal.content().style('visibility', 'hidden')
+          }
         })
         .onPointerExit(point => {
-          this.guideLine.horizontal.pixelPosition(-999)
+          this.guideLine.horizontal.content().style('visibility', 'hidden')
         })
         .attachTo(this.plot.markers)
     }
