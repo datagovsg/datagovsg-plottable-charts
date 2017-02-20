@@ -252,9 +252,9 @@ export function setupShadowWithPopover (component, props) {
 }
 
 /**
- * @param {Function} props.labelFormatter - required
+ * @param {Function} props.labelFormatter - default d => d.label
  */
-export function setupOuterLabel (component, props) {
+export function setupOuterLabel (component, props = {labelFormatter: d => d.label}) {
   component.plot.outerRadius(d => {
     const maxRadius = Math.min(component.plot.width(), component.plot.height()) / 2
     return maxRadius * 0.8
@@ -262,7 +262,7 @@ export function setupOuterLabel (component, props) {
 
   component.plot._clipPathEnabled = false
 
-  function drawLabel (component) {
+  function drawLabel () {
     const radius = Math.min(component.plot.width(), component.plot.height()) / 2
     const innerArc = d3.svg.arc()
       .innerRadius(0)
@@ -315,25 +315,69 @@ export function setupOuterLabel (component, props) {
   }
 
   component.onMount = function (element) {
-    drawLabel(this)
+    drawLabel()
   }
 
   component.onUpdate = function (nextProps) {
-    drawLabel(this)
+    drawLabel()
   }
 
   component.onResize = function () {
-    drawLabel(this)
+    drawLabel()
   }
 }
 
+/*
+  @FIXME
+  Very very hackish stuff
+  Might break when upgrading to Plottable 3.0
+*/
+
 export function removeInnerPadding (component) {
+  const _makeInnerScale = component.plot._makeInnerScale
   component.plot._makeInnerScale = function () {
-    let innerScale = new Plottable.Scales.Category()
-    innerScale.innerPadding(0).outerPadding(0)
-    innerScale.domain(this.datasets().map((d, i) => String(i)))
-    let widthProjector = Plottable.Plot._scaledAccessor(this.attr('width'))
-    innerScale.range([0, widthProjector(null, 0, null)])
-    return innerScale
+    return _makeInnerScale.call(this)
+      .innerPadding(0).outerPadding(0)
   }
+}
+
+export function downsampleTicks (component) {
+  function _downsample (axis) {
+    if (axis instanceof Plottable.Axes.Category) {
+      const renderImmediately = axis.renderImmediately
+      axis.renderImmediately = function () {
+        const minimumSpacing = d3.max(this._scale.domain(),
+          v => this._measurer.measure(v).width) * 1.5
+        const downsampleRatio = Math.ceil(minimumSpacing / this._scale.stepWidth())
+        const domain = this._scale.domain
+        const stepWidth = this._scale.stepWidth
+        this._scale.domain = function () {
+          return domain.call(this)
+            .filter((v, i) => i % downsampleRatio === 0)
+        }
+        this._scale.stepWidth = function () {
+          return stepWidth.call(this) * downsampleRatio
+        }
+        renderImmediately.call(this)
+        this._scale.domain = domain
+        this._scale.stepWidth = stepWidth
+      }
+
+      const _measureTicks = axis._measureTicks
+      axis._measureTicks = function (...args) {
+        const wrap = this._wrapper.wrap
+        this._wrapper.wrap = function (...args) {
+          const result = wrap.call(this, ...args)
+          result.wrappedText = result.originalText
+          return result
+        }
+        const result = _measureTicks.call(this, ...args)
+        this._wrapper.wrap = wrap
+        return result
+      }
+    }
+  }
+
+  _downsample(component.xAxis)
+  _downsample(component.yAxis)
 }

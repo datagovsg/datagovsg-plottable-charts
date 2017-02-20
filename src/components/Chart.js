@@ -52,8 +52,10 @@ export default class Chart {
 
   get onUpdate () {
     return function (nextProps) {
-      this._onUpdate.forEach(cb => {
-        cb.call(this, nextProps)
+      Plottable.Utils.DOM.requestAnimationFramePolyfill(() => {
+        this._onUpdate.forEach(cb => {
+          cb.call(this, nextProps)
+        })
       })
     }
   }
@@ -63,9 +65,11 @@ export default class Chart {
   }
 
   get onResize () {
-    return function (element) {
-      this._onResize.forEach(cb => {
-        cb.call(this)
+    return function () {
+      Plottable.Utils.DOM.requestAnimationFramePolyfill(() => {
+        this._onResize.forEach(cb => {
+          cb.call(this)
+        })
       })
     }
   }
