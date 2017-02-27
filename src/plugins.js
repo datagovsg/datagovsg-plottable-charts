@@ -328,7 +328,7 @@ export function setupOuterLabel (component, props = {labelFormatter: d => d.labe
 }
 
 /*
-  @FIXME
+  FIXME
   Very very hackish stuff
   Might break when upgrading to Plottable 3.0
 */

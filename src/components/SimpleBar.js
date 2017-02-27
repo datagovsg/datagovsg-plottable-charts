@@ -2,8 +2,25 @@ import Chart from './Chart'
 import sortBy from 'lodash/sortBy'
 import {getCustomShortScaleFormatter} from '../helpers'
 
+/**
+ * @typedef {Object} SimpleBar
+ * @property {Object} layout
+ * @property {Object} plot
+ * @property {Object} legend
+ * @property {Object} xAxis
+ * @property {Object} yAxis
+ * @property {Object} xLabel
+ * @property {Object} yLabel
+ * @property {Object} gridlines
+ * @property {Function} mount
+ * @property {Function} update
+ * @property {Function} unmount
+ * @property {Object} options
+ */
+
 export default class SimpleBar extends Chart {
   /**
+   * @param {Object} props
    * @param {string[]} props.labels - required
    * @param {number[]} props.values - required
    * @param {boolean} props.sorted - default false
@@ -23,6 +40,8 @@ export default class SimpleBar extends Chart {
    * @param {boolean} props.animated - default true
    * @param {Function} props.clickHandler - optional
    * @param {Function} props.hoverHandler - optional
+   *
+   * @return {SimpleBar}
    */
   constructor (props) {
     super()

@@ -1,8 +1,20 @@
 import Chart from './Chart'
 import sortBy from 'lodash/sortBy'
 
+/**
+ * @typedef {Object} SimplePie
+ * @property {Object} layout
+ * @property {Object} plot
+ * @property {Object} legend
+ * @property {Function} mount
+ * @property {Function} update
+ * @property {Function} unmount
+ * @property {Object} options
+ */
+
 export default class SimplePie extends Chart {
   /**
+   * @param {Object} props
    * @param {string[]} props.labels - required
    * @param {number[]} props.valuess - required
    * @param {boolean} props.sorted - default false
@@ -13,7 +25,9 @@ export default class SimplePie extends Chart {
    * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
    * @param {boolean} props.animated - default true
    * @param {Function} props.clickHandler - optional
-   * @param {function} props.hoverHandler - optional
+   * @param {Function} props.hoverHandler - optional
+   *
+   * @return {SimplePie}
    */
   constructor (props) {
     super()

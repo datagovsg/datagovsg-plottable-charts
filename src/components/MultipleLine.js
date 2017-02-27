@@ -1,8 +1,28 @@
 import Chart from './Chart'
 import {getCustomShortScaleFormatter} from '../helpers'
 
+/**
+ * @typedef {Object} MultipleLine
+ * @property {Object} layout
+ * @property {Object} plot.lines
+ * @property {Object} plot.markers
+ * @property {Object} legend
+ * @property {Object} xAxis
+ * @property {Object} yAxis
+ * @property {Object} xLabel
+ * @property {Object} yLabel
+ * @property {Object} gridlines
+ * @property {Object} guideLine.horizontal
+ * @property {Object} guideLine.vertical
+ * @property {Function} mount
+ * @property {Function} update
+ * @property {Function} unmount
+ * @property {Object} options
+ */
+
 export default class MultipleLine extends Chart {
   /**
+   * @param {Object} props
    * @param {string[]} props.labels - required
    * @param {Object[]} props.traces - required
    * @param {number[]} props.traces.x- required
@@ -22,6 +42,8 @@ export default class MultipleLine extends Chart {
    * @param {string} props.yLabel - optional
    * @param {Function} props.clickHandler - optional
    * @param {Function} props.hoverHandler - optional
+   *
+   * @return {MultipleLine}
    */
   constructor (props) {
     super()
