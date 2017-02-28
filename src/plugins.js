@@ -25,13 +25,16 @@ export function setupTooltip (component, props) {
   const plot = component.plot.markers || component.plot
   plot.attr('data-title', props.title)
 
+  let $anchor
+  const selectors = [
+    '.render-area .bar-area rect',
+    '.render-area .symbol',
+    '.render-area .arc.outline'
+  ].join(',')
+
   component.onMount = function (element) {
-    const selectors = [
-      '.render-area .bar-area rect',
-      '.render-area .symbol',
-      '.render-area .arc.outline'
-    ].join(',')
-    $(element).find(selectors).tooltip({
+    $anchor = $(element).find(selectors)
+    $anchor.tooltip({
       animation: false,
       container: element.parentNode,
       html: true,
@@ -53,6 +56,10 @@ export function setupTooltip (component, props) {
       }
     })
   }
+
+  component.onUnmount = function () {
+    $anchor.tooltip('destroy')
+  }
 }
 
 /**
@@ -64,13 +71,16 @@ export function setupPopover (component, props) {
   plot.attr('data-title', props.title)
   plot.attr('data-content', props.content)
 
+  let $anchor
+  const selectors = [
+    '.render-area .bar-area rect',
+    '.render-area .symbol',
+    '.render-area .arc.outline'
+  ].join(',')
+
   component.onMount = function (element) {
-    const selectors = [
-      '.render-area .bar-area rect',
-      '.render-area .symbol',
-      '.render-area .arc.outline'
-    ].join(',')
-    $(element).find(selectors).popover({
+    $anchor = $(element).find(selectors)
+    $anchor.popover({
       animation: false,
       container: element.parentNode,
       html: true,
@@ -92,6 +102,10 @@ export function setupPopover (component, props) {
         else return 'left'
       }
     })
+  }
+
+  component.onUnmount = function () {
+    $anchor.popover('destroy')
   }
 }
 
@@ -153,6 +167,10 @@ export function setupPopoverOnGuideLine (component, props) {
       })
     }
   }
+
+  component.onUnmount = function () {
+    $guideLine.popover('destroy')
+  }
 }
 
 /**
@@ -209,6 +227,8 @@ export function setupShadowWithPopover (component, props) {
     })
     .attachTo(shadow)
 
+  let $anchor
+
   component.onMount = function (element) {
     dataset.data(getDomain())
     scale.onUpdate(() => {
@@ -216,8 +236,9 @@ export function setupShadowWithPopover (component, props) {
     })
     shadow.renderImmediately()
 
+    $anchor = $(element).find('.rectangle-plot .render-area rect')
     if (this.plot.orientation() === 'vertical') {
-      $(element).find('.rectangle-plot .render-area rect').popover({
+      $anchor.popover({
         animation: false,
         container: element.parentNode,
         html: true,
@@ -233,7 +254,7 @@ export function setupShadowWithPopover (component, props) {
         }
       })
     } else {
-      $(element).find('.rectangle-plot .render-area rect').popover({
+      $anchor.popover({
         animation: false,
         container: element.parentNode,
         html: true,
@@ -246,6 +267,10 @@ export function setupShadowWithPopover (component, props) {
         }
       })
     }
+  }
+
+  component.onUnmount = function () {
+    $anchor.popover('destroy')
   }
 
   return shadow
@@ -261,6 +286,10 @@ export function setupOuterLabel (component, props = {labelFormatter: d => d.labe
   })
 
   component.plot._clipPathEnabled = false
+
+  function eraseLabel () {
+    component.plot.background().select('.label-area').remove()
+  }
 
   function drawLabel () {
     const radius = Math.min(component.plot.width(), component.plot.height()) / 2
@@ -291,7 +320,7 @@ export function setupOuterLabel (component, props = {labelFormatter: d => d.labe
 
     let origin = [component.plot.width() / 2, component.plot.height() / 2]
 
-    component.plot.background().select('.label-area').remove()
+    eraseLabel()
 
     const labelArea = component.plot.background()
       .insert('g')
@@ -324,6 +353,10 @@ export function setupOuterLabel (component, props = {labelFormatter: d => d.labe
 
   component.onResize = function () {
     drawLabel()
+  }
+
+  component.onUnmount = function () {
+    eraseLabel()
   }
 }
 

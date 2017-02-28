@@ -21,9 +21,9 @@ export default class Chart {
   }
 
   unmount () {
-    this.layout.detach()
-    window.removeEventListener('resize', this.resizeHandler)
     this.onUnmount()
+    window.removeEventListener('resize', this.resizeHandler)
+    this.layout.detach()
   }
 
   get onMount () {
