@@ -1,18 +1,24 @@
 /**
- * @param {string} props.fill - required
+ * @param {string} props.fill - at least one required
+ * @param {string} props.stroke - at least one required
  */
 export function highlightOnHover (component, props) {
   new Plottable.Interactions.Pointer()
     .onPointerMove(point => {
       component.plot.entities().forEach(e => {
         $(e.selection.node()).css('fill', '')
+        $(e.selection.node()).css('stroke', '')
       })
       const target = component.plot.entitiesAt(point)[0]
-      if (target) $(target.selection.node()).css('fill', props.fill)
+      if (target) {
+        $(target.selection.node()).css('fill', props.fill)
+        $(target.selection.node()).css('stroke', props.stroke)
+      }
     })
     .onPointerExit(point => {
       component.plot.entities().forEach(e => {
         $(e.selection.node()).css('fill', '')
+        $(e.selection.node()).css('stroke', '')
       })
     })
     .attachTo(component.plot)
