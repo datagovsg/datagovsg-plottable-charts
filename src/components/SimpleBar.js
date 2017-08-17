@@ -110,7 +110,7 @@ export default class SimpleBar extends Chart {
       const xScale = (props.showXgridlines && horizontal) ? scale : null
       const yScale = (props.showYgridlines && !horizontal) ? scale : null
       this.gridlines = new Plottable.Components.Gridlines(xScale, yScale)
-      plotArea = new Plottable.Components.Group([this.plot, this.gridlines])
+      plotArea = new Plottable.Components.Group([this.gridlines, this.plot])
     } else {
       plotArea = this.plot
     }

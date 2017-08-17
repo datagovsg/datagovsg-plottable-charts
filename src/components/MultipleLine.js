@@ -135,6 +135,9 @@ export default class MultipleLine extends Chart {
           this.guideLine.vertical.content().style('visibility', 'hidden')
         })
         .attachTo(this.plot.markers)
+      this.onMount = function (element) {
+        this.guideLine.vertical.content().style('visibility', 'hidden')
+      }
     }
     if (['h', 'vh', 'hv'].indexOf(props.guideLine) > -1) {
       this.guideLine.horizontal = new Plottable.Components.GuideLineLayer(
@@ -154,6 +157,9 @@ export default class MultipleLine extends Chart {
           this.guideLine.horizontal.content().style('visibility', 'hidden')
         })
         .attachTo(this.plot.markers)
+      this.onMount = function (element) {
+        this.guideLine.horizontal.content().style('visibility', 'hidden')
+      }
     }
 
     const plotArea = new Plottable.Components.Group([

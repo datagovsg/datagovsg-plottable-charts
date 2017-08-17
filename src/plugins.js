@@ -1,24 +1,17 @@
-/**
- * @param {string} props.fill - at least one required
- * @param {string} props.stroke - at least one required
- */
 export function highlightOnHover (component, props) {
   new Plottable.Interactions.Pointer()
     .onPointerMove(point => {
       component.plot.entities().forEach(e => {
-        $(e.selection.node()).css('fill', '')
-        $(e.selection.node()).css('stroke', '')
+        e.selection.classed('highlight', false)
       })
       const target = component.plot.entitiesAt(point)[0]
       if (target) {
-        $(target.selection.node()).css('fill', props.fill)
-        $(target.selection.node()).css('stroke', props.stroke)
+        target.selection.classed('highlight', true)
       }
     })
     .onPointerExit(point => {
       component.plot.entities().forEach(e => {
-        $(e.selection.node()).css('fill', '')
-        $(e.selection.node()).css('stroke', '')
+        e.selection.classed('highlight', false)
       })
     })
     .attachTo(component.plot)
@@ -194,11 +187,10 @@ export function setupShadowWithPopover (component, props) {
   const dataset = new Plottable.Dataset()
 
   const shadow = new Plottable.Plots.Rectangle()
+    .addClass('shadow')
     .addDataset(dataset)
     .attr('data-title', props.title)
     .attr('data-content', props.content)
-    .attr('fill', 'black')
-    .attr('opacity', 0)
 
   if (component.plot.orientation() === 'vertical') {
     shadow
@@ -221,14 +213,18 @@ export function setupShadowWithPopover (component, props) {
   new Plottable.Interactions.Pointer()
     .onPointerMove(point => {
       shadow.entities().forEach(e => {
-        $(e.selection.node()).css('opacity', 0).popover('hide')
+        $(e.selection.node()).css('visibility', 'hidden').popover('hide')
       })
       const target = shadow.entitiesAt(point)[0]
-      if (target) $(target.selection.node()).css('opacity', 0.1).popover('show')
+      if (target) {
+        $(target.selection.node())
+          .css('visibility', 'visible')
+          .popover('show')
+      }
     })
     .onPointerExit(point => {
       shadow.entities().forEach(e => {
-        $(e.selection.node()).css('opacity', 0).popover('hide')
+        $(e.selection.node()).css('visibility', 'hidden').popover('hide')
       })
     })
     .attachTo(shadow)
@@ -242,7 +238,8 @@ export function setupShadowWithPopover (component, props) {
     })
     shadow.renderImmediately()
 
-    $anchor = $(element).find('.rectangle-plot .render-area rect')
+    $anchor = $(element).find('.shadow .render-area rect')
+    $anchor.css('visibility', 'hidden')
     if (this.plot.orientation() === 'vertical') {
       $anchor.popover({
         animation: false,
