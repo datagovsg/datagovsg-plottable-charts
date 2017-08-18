@@ -147,7 +147,7 @@ var SimpleBar = function (_Chart) {
       var xScale = props.showXgridlines && horizontal ? scale : null;
       var yScale = props.showYgridlines && !horizontal ? scale : null;
       _this.gridlines = new Plottable.Components.Gridlines(xScale, yScale);
-      plotArea = new Plottable.Components.Group([_this.plot, _this.gridlines]);
+      plotArea = new Plottable.Components.Group([_this.gridlines, _this.plot]);
     } else {
       plotArea = _this.plot;
     }

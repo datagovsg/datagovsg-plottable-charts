@@ -167,6 +167,9 @@ var MultipleLine = function (_Chart) {
       }).onPointerExit(function (point) {
         _this.guideLine.vertical.content().style('visibility', 'hidden');
       }).attachTo(_this.plot.markers);
+      _this.onMount = function (element) {
+        this.guideLine.vertical.content().style('visibility', 'hidden');
+      };
     }
     if (['h', 'vh', 'hv'].indexOf(props.guideLine) > -1) {
       _this.guideLine.horizontal = new Plottable.Components.GuideLineLayer(Plottable.Components.GuideLineLayer.ORIENTATION_HORIZONTAL).scale(yScale);
@@ -181,6 +184,9 @@ var MultipleLine = function (_Chart) {
       }).onPointerExit(function (point) {
         _this.guideLine.horizontal.content().style('visibility', 'hidden');
       }).attachTo(_this.plot.markers);
+      _this.onMount = function (element) {
+        this.guideLine.horizontal.content().style('visibility', 'hidden');
+      };
     }
 
     var plotArea = new Plottable.Components.Group([_this.gridlines, _this.guideLine.horizontal, _this.guideLine.vertical, _this.plot.lines, _this.plot.markers]);
