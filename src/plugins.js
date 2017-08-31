@@ -1,17 +1,25 @@
+// to overwrite default highlight color,
+// add a css rule on .highlight and mark it !important
+//
+// eg.
+//
+// .highlight {
+//   fill: anotherColor!important;
+// }
 export function highlightOnHover (component, props) {
   new Plottable.Interactions.Pointer()
     .onPointerMove(point => {
       component.plot.entities().forEach(e => {
-        e.selection.classed('highlight', false)
+        e.selection.classed('highlight', false).style('fill', '')
       })
       const target = component.plot.entitiesAt(point)[0]
       if (target) {
-        target.selection.classed('highlight', true)
+        target.selection.classed('highlight', true).style('fill', 'lightgrey')
       }
     })
     .onPointerExit(point => {
       component.plot.entities().forEach(e => {
-        e.selection.classed('highlight', false)
+        e.selection.classed('highlight', false).style('fill', '')
       })
     })
     .attachTo(component.plot)
@@ -191,6 +199,7 @@ export function setupShadowWithPopover (component, props) {
     .addDataset(dataset)
     .attr('data-title', props.title)
     .attr('data-content', props.content)
+    .attr('fill', 'rgba(0, 0, 0, 0.1)')
 
   if (component.plot.orientation() === 'vertical') {
     shadow

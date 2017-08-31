@@ -19,18 +19,26 @@ exports.downsampleTicks = downsampleTicks;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// to overwrite default highlight color,
+// add a css rule on .highlight and mark it !important
+//
+// eg.
+//
+// .highlight {
+//   fill: anotherColor!important;
+// }
 function highlightOnHover(component, props) {
   new Plottable.Interactions.Pointer().onPointerMove(function (point) {
     component.plot.entities().forEach(function (e) {
-      e.selection.classed('highlight', false);
+      e.selection.classed('highlight', false).style('fill', '');
     });
     var target = component.plot.entitiesAt(point)[0];
     if (target) {
-      target.selection.classed('highlight', true);
+      target.selection.classed('highlight', true).style('fill', 'lightgrey');
     }
   }).onPointerExit(function (point) {
     component.plot.entities().forEach(function (e) {
-      e.selection.classed('highlight', false);
+      e.selection.classed('highlight', false).style('fill', '');
     });
   }).attachTo(component.plot);
 }
@@ -201,7 +209,7 @@ function setupShadowWithPopover(component, props) {
   }
   var dataset = new Plottable.Dataset();
 
-  var shadow = new Plottable.Plots.Rectangle().addClass('shadow').addDataset(dataset).attr('data-title', props.title).attr('data-content', props.content);
+  var shadow = new Plottable.Plots.Rectangle().addClass('shadow').addDataset(dataset).attr('data-title', props.title).attr('data-content', props.content).attr('fill', 'rgba(0, 0, 0, 0.1)');
 
   if (component.plot.orientation() === 'vertical') {
     shadow.x(function (d) {
