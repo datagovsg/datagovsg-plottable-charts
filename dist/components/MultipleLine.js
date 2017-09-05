@@ -4,29 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _assign = require('babel-runtime/core-js/object/assign');
-
-var _assign2 = _interopRequireDefault(_assign);
-
-var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
-
-var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
-
-var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require('babel-runtime/helpers/createClass');
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
-
-var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
-
-var _inherits2 = require('babel-runtime/helpers/inherits');
-
-var _inherits3 = _interopRequireDefault(_inherits2);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Chart2 = require('./Chart');
 
@@ -35,6 +13,12 @@ var _Chart3 = _interopRequireDefault(_Chart2);
 var _helpers = require('../helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
  * @typedef {Object} MultipleLine
@@ -56,7 +40,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 
 var MultipleLine = function (_Chart) {
-  (0, _inherits3.default)(MultipleLine, _Chart);
+  _inherits(MultipleLine, _Chart);
 
   /**
    * @param {Object} props
@@ -83,9 +67,9 @@ var MultipleLine = function (_Chart) {
    * @return {MultipleLine}
    */
   function MultipleLine(props) {
-    (0, _classCallCheck3.default)(this, MultipleLine);
+    _classCallCheck(this, MultipleLine);
 
-    var _this = (0, _possibleConstructorReturn3.default)(this, (MultipleLine.__proto__ || (0, _getPrototypeOf2.default)(MultipleLine)).call(this));
+    var _this = _possibleConstructorReturn(this, (MultipleLine.__proto__ || Object.getPrototypeOf(MultipleLine)).call(this));
 
     _this.options = {
       strokeWidth: 2,
@@ -97,7 +81,7 @@ var MultipleLine = function (_Chart) {
       guideLine: 'none',
       legendPosition: 'r'
     };
-    props = (0, _assign2.default)(_this.options, props);
+    props = Object.assign(_this.options, props);
 
     if (props.labels.length !== props.traces.length) throw new Error();
     _this.datasets = props.traces.map(function (t, i) {
@@ -235,7 +219,7 @@ var MultipleLine = function (_Chart) {
     return _this;
   }
 
-  (0, _createClass3.default)(MultipleLine, [{
+  _createClass(MultipleLine, [{
     key: 'update',
     value: function update(nextProps) {
       if (nextProps.labels.length !== nextProps.traces.length) throw new Error();
@@ -246,13 +230,14 @@ var MultipleLine = function (_Chart) {
         });
         return new Plottable.Dataset(data).metadata(nextProps.labels[i]);
       });
-      (0, _assign2.default)(this.options, {
+      Object.assign(this.options, {
         labels: nextProps.labels,
         traces: nextProps.traces
       });
       this.onUpdate(nextProps);
     }
   }]);
+
   return MultipleLine;
 }(_Chart3.default);
 

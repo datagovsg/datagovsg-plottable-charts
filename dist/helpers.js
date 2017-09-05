@@ -4,9 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
-
-var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 exports.getCustomShortScaleFormatter = getCustomShortScaleFormatter;
 exports.getCustomTickGenerator = getCustomTickGenerator;
@@ -33,7 +31,7 @@ function getCustomShortScaleFormatter() {
 function getCustomTickGenerator() {
   return function (scale) {
     var _scale$domain = scale.domain(),
-        _scale$domain2 = (0, _slicedToArray3.default)(_scale$domain, 2),
+        _scale$domain2 = _slicedToArray(_scale$domain, 2),
         domainMin = _scale$domain2[0],
         domainMax = _scale$domain2[1];
 

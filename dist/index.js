@@ -1,31 +1,52 @@
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 var _SimplePie = require('./components/SimplePie');
 
-var _SimplePie2 = _interopRequireDefault(_SimplePie);
+Object.defineProperty(exports, 'SimplePie', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SimplePie).default;
+  }
+});
 
 var _SimpleBar = require('./components/SimpleBar');
 
-var _SimpleBar2 = _interopRequireDefault(_SimpleBar);
+Object.defineProperty(exports, 'SimpleBar', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SimpleBar).default;
+  }
+});
 
 var _GroupedBar = require('./components/GroupedBar');
 
-var _GroupedBar2 = _interopRequireDefault(_GroupedBar);
+Object.defineProperty(exports, 'GroupedBar', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_GroupedBar).default;
+  }
+});
 
 var _StackedBar = require('./components/StackedBar');
 
-var _StackedBar2 = _interopRequireDefault(_StackedBar);
+Object.defineProperty(exports, 'StackedBar', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_StackedBar).default;
+  }
+});
 
 var _MultipleLine = require('./components/MultipleLine');
 
-var _MultipleLine2 = _interopRequireDefault(_MultipleLine);
+Object.defineProperty(exports, 'MultipleLine', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_MultipleLine).default;
+  }
+});
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-module.exports = {
-  SimplePie: _SimplePie2.default,
-  SimpleBar: _SimpleBar2.default,
-  GroupedBar: _GroupedBar2.default,
-  StackedBar: _StackedBar2.default,
-  MultipleLine: _MultipleLine2.default
-};

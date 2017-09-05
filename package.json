@@ -4,8 +4,9 @@
   "description": "Reusable Plottable chart components",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rm -r dist/ && mkdir -p dist && babel src --out-dir dist",
-    "test": "standard src/**/*.js"
+    "build": "rm -rf dist/ && mkdir -p dist && babel src --out-dir dist",
+    "test": "standard src/**/*.js",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -18,12 +19,10 @@
   },
   "homepage": "https://github.com/datagovsg/datagovsg-plottable-charts#readme",
   "dependencies": {
-    "babel-runtime": "^6.23.0",
     "lodash": "^4.17.4"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
-    "babel-plugin-transform-runtime": "^6.15.0",
     "babel-preset-es2015": "^6.18.0",
     "babel-preset-stage-2": "^6.18.0",
     "standard": "^8.5.0"
@@ -32,9 +31,6 @@
     "presets": [
       "es2015",
       "stage-2"
-    ],
-    "plugins": [
-      "transform-runtime"
     ]
   },
   "standard": {

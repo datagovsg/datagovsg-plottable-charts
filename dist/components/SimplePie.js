@@ -4,29 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _assign = require('babel-runtime/core-js/object/assign');
-
-var _assign2 = _interopRequireDefault(_assign);
-
-var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
-
-var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
-
-var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require('babel-runtime/helpers/createClass');
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
-
-var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
-
-var _inherits2 = require('babel-runtime/helpers/inherits');
-
-var _inherits3 = _interopRequireDefault(_inherits2);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Chart2 = require('./Chart');
 
@@ -37,6 +15,12 @@ var _sortBy = require('lodash/sortBy');
 var _sortBy2 = _interopRequireDefault(_sortBy);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
  * @typedef {Object} SimplePie
@@ -50,7 +34,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 
 var SimplePie = function (_Chart) {
-  (0, _inherits3.default)(SimplePie, _Chart);
+  _inherits(SimplePie, _Chart);
 
   /**
    * @param {Object} props
@@ -69,9 +53,9 @@ var SimplePie = function (_Chart) {
    * @return {SimplePie}
    */
   function SimplePie(props) {
-    (0, _classCallCheck3.default)(this, SimplePie);
+    _classCallCheck(this, SimplePie);
 
-    var _this = (0, _possibleConstructorReturn3.default)(this, (SimplePie.__proto__ || (0, _getPrototypeOf2.default)(SimplePie)).call(this));
+    var _this = _possibleConstructorReturn(this, (SimplePie.__proto__ || Object.getPrototypeOf(SimplePie)).call(this));
 
     _this.options = {
       sorted: false,
@@ -79,7 +63,7 @@ var SimplePie = function (_Chart) {
       legendPosition: 'none',
       animated: true
     };
-    props = (0, _assign2.default)(_this.options, props);
+    props = Object.assign(_this.options, props);
 
     if (props.labels.length !== props.values.length) throw new Error();
     var data = props.values.map(function (v, i) {
@@ -140,7 +124,7 @@ var SimplePie = function (_Chart) {
     return _this;
   }
 
-  (0, _createClass3.default)(SimplePie, [{
+  _createClass(SimplePie, [{
     key: 'update',
     value: function update(nextProps) {
       if (nextProps.labels.length !== nextProps.values.length) throw new Error();
@@ -154,13 +138,14 @@ var SimplePie = function (_Chart) {
       }, 0);
       this.plot.sectorValue().scale.domain([0, total]);
       this.dataset.data(data);
-      (0, _assign2.default)(this.options, {
+      Object.assign(this.options, {
         labels: nextProps.labels,
         values: nextProps.values
       });
       this.onUpdate(nextProps);
     }
   }]);
+
   return SimplePie;
 }(_Chart3.default);
 

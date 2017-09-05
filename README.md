@@ -3,7 +3,7 @@ Reusable Plottable chart components
 
 ### Using the chart components
 ```bash
-npm install --save github:datagovsg/datagovsg-plottable-charts
+npm install --save datagovsg-plottable-charts
 ```
 
 ```javascript
@@ -24,6 +24,17 @@ pie.mount(document.getElementById('ctn'))
 
 // Update chart
 pie.update(newProps)
+```
+
+### Using plugins
+```javascript
+import {
+  highlightOnHover,
+  setupOuterLabel
+} from 'datagovsg-plottable-charts/dist/plugins'
+
+highlightOnHover(pie)
+setupOuterLabel(pie)
 ```
 
 ### Debugging guide

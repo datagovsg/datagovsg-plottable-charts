@@ -3,11 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
-
-var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
-
 exports.highlightOnHover = highlightOnHover;
 exports.setupTooltip = setupTooltip;
 exports.setupPopover = setupPopover;
@@ -17,7 +12,7 @@ exports.setupOuterLabel = setupOuterLabel;
 exports.removeInnerPadding = removeInnerPadding;
 exports.downsampleTicks = downsampleTicks;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 // to overwrite default highlight color,
 // add a css rule on .highlight and mark it !important
@@ -404,51 +399,49 @@ function removeInnerPadding(component) {
 function downsampleTicks(component) {
   function _downsample(axis) {
     if (axis instanceof Plottable.Axes.Category) {
-      (function () {
-        var renderImmediately = axis.renderImmediately;
-        axis.renderImmediately = function () {
-          var _this = this;
+      var renderImmediately = axis.renderImmediately;
+      axis.renderImmediately = function () {
+        var _this = this;
 
-          var minimumSpacing = d3.max(this._scale.domain(), function (v) {
-            return _this._measurer.measure(v).width;
-          }) * 1.5;
-          var downsampleRatio = Math.ceil(minimumSpacing / this._scale.stepWidth());
-          var domain = this._scale.domain;
-          var stepWidth = this._scale.stepWidth;
-          this._scale.domain = function () {
-            return domain.call(this).filter(function (v, i) {
-              return i % downsampleRatio === 0;
-            });
-          };
-          this._scale.stepWidth = function () {
-            return stepWidth.call(this) * downsampleRatio;
-          };
-          renderImmediately.call(this);
-          this._scale.domain = domain;
-          this._scale.stepWidth = stepWidth;
+        var minimumSpacing = d3.max(this._scale.domain(), function (v) {
+          return _this._measurer.measure(v).width;
+        }) * 1.5;
+        var downsampleRatio = Math.ceil(minimumSpacing / this._scale.stepWidth());
+        var domain = this._scale.domain;
+        var stepWidth = this._scale.stepWidth;
+        this._scale.domain = function () {
+          return domain.call(this).filter(function (v, i) {
+            return i % downsampleRatio === 0;
+          });
         };
+        this._scale.stepWidth = function () {
+          return stepWidth.call(this) * downsampleRatio;
+        };
+        renderImmediately.call(this);
+        this._scale.domain = domain;
+        this._scale.stepWidth = stepWidth;
+      };
 
-        var _measureTicks = axis._measureTicks;
-        axis._measureTicks = function () {
-          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
+      var _measureTicks = axis._measureTicks;
+      axis._measureTicks = function () {
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        var wrap = this._wrapper.wrap;
+        this._wrapper.wrap = function () {
+          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            args[_key2] = arguments[_key2];
           }
 
-          var wrap = this._wrapper.wrap;
-          this._wrapper.wrap = function () {
-            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-              args[_key2] = arguments[_key2];
-            }
-
-            var result = wrap.call.apply(wrap, [this].concat(args));
-            result.wrappedText = result.originalText;
-            return result;
-          };
-          var result = _measureTicks.call.apply(_measureTicks, [this].concat((0, _toConsumableArray3.default)(args)));
-          this._wrapper.wrap = wrap;
+          var result = wrap.call.apply(wrap, [this].concat(args));
+          result.wrappedText = result.originalText;
           return result;
         };
-      })();
+        var result = _measureTicks.call.apply(_measureTicks, [this].concat(_toConsumableArray(args)));
+        this._wrapper.wrap = wrap;
+        return result;
+      };
     }
   }
 
