@@ -10,8 +10,6 @@ var _Chart2 = require('./Chart');
 
 var _Chart3 = _interopRequireDefault(_Chart2);
 
-var _helpers = require('../helpers');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -182,7 +180,7 @@ var MultipleLine = function (_Chart) {
       if (xScale instanceof Plottable.Scales.Time) {
         _this.xAxis = new Plottable.Axes.Time(xScale, 'bottom');
       } else if (xScale instanceof Plottable.QuantitativeScale) {
-        _this.xAxis = new Plottable.Axes.Numeric(xScale, 'bottom').formatter((0, _helpers.getCustomShortScaleFormatter)());
+        _this.xAxis = new Plottable.Axes.Numeric(xScale, 'bottom');
       } else {
         _this.xAxis = new Plottable.Axes.Category(xScale, 'bottom');
       }
@@ -192,7 +190,7 @@ var MultipleLine = function (_Chart) {
       if (yScale instanceof Plottable.Scales.Time) {
         _this.yAxis = new Plottable.Axes.Time(yScale, 'left');
       } else if (yScale instanceof Plottable.QuantitativeScale) {
-        _this.yAxis = new Plottable.Axes.Numeric(yScale, 'left').formatter((0, _helpers.getCustomShortScaleFormatter)());
+        _this.yAxis = new Plottable.Axes.Numeric(yScale, 'left');
       } else {
         _this.yAxis = new Plottable.Axes.Category(yScale, 'left');
       }

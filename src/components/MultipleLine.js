@@ -1,5 +1,4 @@
 import Chart from './Chart'
-import {getCustomShortScaleFormatter} from '../helpers'
 
 /**
  * @typedef {Object} MultipleLine
@@ -184,7 +183,6 @@ export default class MultipleLine extends Chart {
         this.xAxis = new Plottable.Axes.Time(xScale, 'bottom')
       } else if (xScale instanceof Plottable.QuantitativeScale) {
         this.xAxis = new Plottable.Axes.Numeric(xScale, 'bottom')
-          .formatter(getCustomShortScaleFormatter())
       } else {
         this.xAxis = new Plottable.Axes.Category(xScale, 'bottom')
       }
@@ -195,7 +193,6 @@ export default class MultipleLine extends Chart {
         this.yAxis = new Plottable.Axes.Time(yScale, 'left')
       } else if (yScale instanceof Plottable.QuantitativeScale) {
         this.yAxis = new Plottable.Axes.Numeric(yScale, 'left')
-          .formatter(getCustomShortScaleFormatter())
       } else {
         this.yAxis = new Plottable.Axes.Category(yScale, 'left')
       }

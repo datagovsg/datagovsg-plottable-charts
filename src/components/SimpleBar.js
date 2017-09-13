@@ -1,6 +1,5 @@
 import Chart from './Chart'
 import sortBy from 'lodash/sortBy'
-import {getCustomShortScaleFormatter} from '../helpers'
 
 /**
  * @typedef {Object} SimpleBar
@@ -58,11 +57,9 @@ export default class SimpleBar extends Chart {
     }
     props = Object.assign(this.options, props)
 
-    if (props.labels.length !== props.values.length) throw new Error()
-    let data = props.values.map((v, i) => ({value: v, label: props.labels[i]}))
-    if (props.sorted) data = sortBy(data, 'value')
-    if (props.sorted === 'd') data.reverse()
-    this.dataset = new Plottable.Dataset(data)
+    if (props.sorted) props.data = sortBy(props.data, 'value')
+    if (props.sorted === 'd') props.data.reverse()
+    this.dataset = new Plottable.Dataset(props.data)
 
     const scale = props.scale || new Plottable.Scales.Linear()
     const categoryScale = props.categoryScale || new Plottable.Scales.Category()
@@ -123,7 +120,6 @@ export default class SimpleBar extends Chart {
     if (!props.hideXaxis) {
       if (horizontal) {
         this.xAxis = new Plottable.Axes.Numeric(scale, 'bottom')
-          .formatter(getCustomShortScaleFormatter())
       } else {
         this.xAxis = categoryScale instanceof Plottable.Scales.Time
           ? new Plottable.Axes.Time(categoryScale, 'bottom')
@@ -139,7 +135,6 @@ export default class SimpleBar extends Chart {
           : new Plottable.Axes.Category(categoryScale, 'left')
       } else {
         this.yAxis = new Plottable.Axes.Numeric(scale, 'left')
-          .formatter(getCustomShortScaleFormatter())
       }
       _layout.add(this.yAxis, 0, 1)
     }
@@ -154,16 +149,10 @@ export default class SimpleBar extends Chart {
   }
 
   update (nextProps) {
-    if (nextProps.labels.length !== nextProps.values.length) throw new Error()
-    let data = nextProps.values
-      .map((v, i) => ({value: v, label: nextProps.labels[i]}))
-    if (this.options.sorted) data = sortBy(data, 'value')
-    if (this.options.sorted === 'd') data.reverse()
-    this.dataset.data(data)
-    Object.assign(this.options, {
-      labels: nextProps.labels,
-      values: nextProps.values
-    })
+    if (this.options.sorted) nextProps.data = sortBy(nextProps.data, 'value')
+    if (this.options.sorted === 'd') nextProps.data.reverse()
+    this.dataset.data(nextProps.data)
+    Object.assign(this.options, {data: nextProps.data})
     this.onUpdate(nextProps)
   }
 }

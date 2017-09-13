@@ -1,11 +1,11 @@
-// to overwrite default highlight color,
-// add a css rule on .highlight and mark it !important
-//
-// eg.
-//
-// .highlight {
-//   fill: anotherColor!important;
-// }
+/*
+  to overwrite default highlight color,
+  add a css rule on .highlight and mark it !important. Eg.
+
+  .highlight {
+    fill: anotherColor!important;
+  }
+*/
 export function highlightOnHover (component, props) {
   new Plottable.Interactions.Pointer()
     .onPointerMove(point => {

@@ -14,8 +14,6 @@ var _sortBy = require('lodash/sortBy');
 
 var _sortBy2 = _interopRequireDefault(_sortBy);
 
-var _helpers = require('../helpers');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -85,13 +83,9 @@ var SimpleBar = function (_Chart) {
     };
     props = Object.assign(_this.options, props);
 
-    if (props.labels.length !== props.values.length) throw new Error();
-    var data = props.values.map(function (v, i) {
-      return { value: v, label: props.labels[i] };
-    });
-    if (props.sorted) data = (0, _sortBy2.default)(data, 'value');
-    if (props.sorted === 'd') data.reverse();
-    _this.dataset = new Plottable.Dataset(data);
+    if (props.sorted) props.data = (0, _sortBy2.default)(props.data, 'value');
+    if (props.sorted === 'd') props.data.reverse();
+    _this.dataset = new Plottable.Dataset(props.data);
 
     var scale = props.scale || new Plottable.Scales.Linear();
     var categoryScale = props.categoryScale || new Plottable.Scales.Category();
@@ -139,7 +133,7 @@ var SimpleBar = function (_Chart) {
     var _layout = new Plottable.Components.Table([[null, null, plotArea], [null, null, null], [null, null, null]]);
     if (!props.hideXaxis) {
       if (horizontal) {
-        _this.xAxis = new Plottable.Axes.Numeric(scale, 'bottom').formatter((0, _helpers.getCustomShortScaleFormatter)());
+        _this.xAxis = new Plottable.Axes.Numeric(scale, 'bottom');
       } else {
         _this.xAxis = categoryScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(categoryScale, 'bottom') : new Plottable.Axes.Category(categoryScale, 'bottom');
       }
@@ -152,7 +146,7 @@ var SimpleBar = function (_Chart) {
       if (horizontal) {
         _this.yAxis = categoryScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(categoryScale, 'left') : new Plottable.Axes.Category(categoryScale, 'left');
       } else {
-        _this.yAxis = new Plottable.Axes.Numeric(scale, 'left').formatter((0, _helpers.getCustomShortScaleFormatter)());
+        _this.yAxis = new Plottable.Axes.Numeric(scale, 'left');
       }
       _layout.add(_this.yAxis, 0, 1);
     }
@@ -170,17 +164,10 @@ var SimpleBar = function (_Chart) {
   _createClass(SimpleBar, [{
     key: 'update',
     value: function update(nextProps) {
-      if (nextProps.labels.length !== nextProps.values.length) throw new Error();
-      var data = nextProps.values.map(function (v, i) {
-        return { value: v, label: nextProps.labels[i] };
-      });
-      if (this.options.sorted) data = (0, _sortBy2.default)(data, 'value');
-      if (this.options.sorted === 'd') data.reverse();
-      this.dataset.data(data);
-      Object.assign(this.options, {
-        labels: nextProps.labels,
-        values: nextProps.values
-      });
+      if (this.options.sorted) nextProps.data = (0, _sortBy2.default)(nextProps.data, 'value');
+      if (this.options.sorted === 'd') nextProps.data.reverse();
+      this.dataset.data(nextProps.data);
+      Object.assign(this.options, { data: nextProps.data });
       this.onUpdate(nextProps);
     }
   }]);

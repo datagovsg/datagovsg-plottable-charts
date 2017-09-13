@@ -1,5 +1,4 @@
 import Chart from './Chart'
-import {getCustomShortScaleFormatter} from '../helpers'
 
 /**
  * @typedef {Object} StackedBar
@@ -57,12 +56,7 @@ export default class StackedBar extends Chart {
     }
     props = Object.assign(this.options, props)
 
-    if (props.labels.length !== props.traces.length) throw new Error()
-    this.datasets = props.traces.map((t, i) => {
-      if (t.labels.length !== t.values.length) throw new Error()
-      const data = t.values.map((v, i) => ({value: v, label: t.labels[i]}))
-      return new Plottable.Dataset(data).metadata(props.labels[i])
-    })
+    this.datasets = props.data.map(t => new Plottable.Dataset(t.series, t.label))
 
     const scale = props.scale || new Plottable.Scales.Linear()
     const categoryScale = props.categoryScale || new Plottable.Scales.Category()
@@ -126,7 +120,6 @@ export default class StackedBar extends Chart {
     if (!props.hideXaxis) {
       if (horizontal) {
         this.xAxis = new Plottable.Axes.Numeric(scale, 'bottom')
-          .formatter(getCustomShortScaleFormatter())
       } else {
         this.xAxis = categoryScale instanceof Plottable.Scales.Time
           ? new Plottable.Axes.Time(categoryScale, 'bottom')
@@ -141,7 +134,6 @@ export default class StackedBar extends Chart {
           : new Plottable.Axes.Category(categoryScale, 'left')
       } else {
         this.yAxis = new Plottable.Axes.Numeric(scale, 'left')
-          .formatter(getCustomShortScaleFormatter())
       }
       _layout.add(this.yAxis, 0, 1)
     }
@@ -179,19 +171,13 @@ export default class StackedBar extends Chart {
   }
 
   update (nextProps) {
-    if (nextProps.labels.length !== nextProps.traces.length) throw new Error()
-    this.datasets = nextProps.traces.map((t, i) => {
-      if (t.labels.length !== t.values.length) throw new Error()
-      const data = t.values.map((v, i) => ({value: v, label: t.labels[i]}))
-      return new Plottable.Dataset(data).metadata(nextProps.labels[i])
-    })
+    this.datasets = nextProps.data.map(s => new Plottable.Dataset(s.items, s.label))
     this.plot.datasets(this.datasets)
     const colorScale = nextProps.colorScale || new Plottable.Scales.Color()
     this.plot.attr('fill', (d, i, dataset) => dataset.metadata(), colorScale)
     this.legend.colorScale(colorScale)
     Object.assign(this.options, {
-      labels: nextProps.labels,
-      traces: nextProps.traces,
+      data: nextProps.data,
       colorScale: nextProps.colorScale
     })
     this.onUpdate(nextProps)

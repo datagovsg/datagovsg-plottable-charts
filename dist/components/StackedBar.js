@@ -10,8 +10,6 @@ var _Chart2 = require('./Chart');
 
 var _Chart3 = _interopRequireDefault(_Chart2);
 
-var _helpers = require('../helpers');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -81,13 +79,8 @@ var StackedBar = function (_Chart) {
     };
     props = Object.assign(_this.options, props);
 
-    if (props.labels.length !== props.traces.length) throw new Error();
-    _this.datasets = props.traces.map(function (t, i) {
-      if (t.labels.length !== t.values.length) throw new Error();
-      var data = t.values.map(function (v, i) {
-        return { value: v, label: t.labels[i] };
-      });
-      return new Plottable.Dataset(data).metadata(props.labels[i]);
+    _this.datasets = props.data.map(function (t) {
+      return new Plottable.Dataset(t.series, t.label);
     });
 
     var scale = props.scale || new Plottable.Scales.Linear();
@@ -142,7 +135,7 @@ var StackedBar = function (_Chart) {
     var _layout = new Plottable.Components.Table([[null, null, plotArea], [null, null, null], [null, null, null]]);
     if (!props.hideXaxis) {
       if (horizontal) {
-        _this.xAxis = new Plottable.Axes.Numeric(scale, 'bottom').formatter((0, _helpers.getCustomShortScaleFormatter)());
+        _this.xAxis = new Plottable.Axes.Numeric(scale, 'bottom');
       } else {
         _this.xAxis = categoryScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(categoryScale, 'bottom') : new Plottable.Axes.Category(categoryScale, 'bottom');
       }
@@ -152,7 +145,7 @@ var StackedBar = function (_Chart) {
       if (horizontal) {
         _this.yAxis = categoryScale instanceof Plottable.Scales.Time ? new Plottable.Axes.Time(categoryScale, 'left') : new Plottable.Axes.Category(categoryScale, 'left');
       } else {
-        _this.yAxis = new Plottable.Axes.Numeric(scale, 'left').formatter((0, _helpers.getCustomShortScaleFormatter)());
+        _this.yAxis = new Plottable.Axes.Numeric(scale, 'left');
       }
       _layout.add(_this.yAxis, 0, 1);
     }
@@ -181,13 +174,8 @@ var StackedBar = function (_Chart) {
   _createClass(StackedBar, [{
     key: 'update',
     value: function update(nextProps) {
-      if (nextProps.labels.length !== nextProps.traces.length) throw new Error();
-      this.datasets = nextProps.traces.map(function (t, i) {
-        if (t.labels.length !== t.values.length) throw new Error();
-        var data = t.values.map(function (v, i) {
-          return { value: v, label: t.labels[i] };
-        });
-        return new Plottable.Dataset(data).metadata(nextProps.labels[i]);
+      this.datasets = nextProps.data.map(function (s) {
+        return new Plottable.Dataset(s.items, s.label);
       });
       this.plot.datasets(this.datasets);
       var colorScale = nextProps.colorScale || new Plottable.Scales.Color();
@@ -196,8 +184,7 @@ var StackedBar = function (_Chart) {
       }, colorScale);
       this.legend.colorScale(colorScale);
       Object.assign(this.options, {
-        labels: nextProps.labels,
-        traces: nextProps.traces,
+        data: nextProps.data,
         colorScale: nextProps.colorScale
       });
       this.onUpdate(nextProps);

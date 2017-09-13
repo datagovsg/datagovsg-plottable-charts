@@ -65,15 +65,11 @@ var SimplePie = function (_Chart) {
     };
     props = Object.assign(_this.options, props);
 
-    if (props.labels.length !== props.values.length) throw new Error();
-    var data = props.values.map(function (v, i) {
-      return { value: v, label: props.labels[i] };
-    });
-    if (props.sorted) data = (0, _sortBy2.default)(data, 'value');
-    if (props.sorted === 'd') data.reverse();
-    _this.dataset = new Plottable.Dataset(data);
+    if (props.sorted) props.data = (0, _sortBy2.default)(props.data, 'value');
+    if (props.sorted === 'd') props.data.reverse();
+    _this.dataset = new Plottable.Dataset(props.data);
 
-    var total = data.reduce(function (sum, d) {
+    var total = props.data.reduce(function (sum, d) {
       return sum + d.value;
     }, 0);
     var scale = new Plottable.Scales.Linear().domain([0, total]);
@@ -127,21 +123,14 @@ var SimplePie = function (_Chart) {
   _createClass(SimplePie, [{
     key: 'update',
     value: function update(nextProps) {
-      if (nextProps.labels.length !== nextProps.values.length) throw new Error();
-      var data = nextProps.values.map(function (v, i) {
-        return { value: v, label: nextProps.labels[i] };
-      });
-      if (this.options.sorted) data = (0, _sortBy2.default)(data, 'value');
-      if (this.options.sorted === 'd') data.reverse();
-      var total = data.reduce(function (sum, d) {
+      if (this.options.sorted) nextProps.data = (0, _sortBy2.default)(nextProps.data, 'value');
+      if (this.options.sorted === 'd') nextProps.data.reverse();
+      var total = nextProps.data.reduce(function (sum, d) {
         return sum + d.value;
       }, 0);
       this.plot.sectorValue().scale.domain([0, total]);
-      this.dataset.data(data);
-      Object.assign(this.options, {
-        labels: nextProps.labels,
-        values: nextProps.values
-      });
+      this.dataset.data(nextProps.data);
+      Object.assign(this.options, { data: nextProps.data });
       this.onUpdate(nextProps);
     }
   }]);

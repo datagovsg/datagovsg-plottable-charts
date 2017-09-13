@@ -39,13 +39,11 @@ export default class SimplePie extends Chart {
     }
     props = Object.assign(this.options, props)
 
-    if (props.labels.length !== props.values.length) throw new Error()
-    let data = props.values.map((v, i) => ({value: v, label: props.labels[i]}))
-    if (props.sorted) data = sortBy(data, 'value')
-    if (props.sorted === 'd') data.reverse()
-    this.dataset = new Plottable.Dataset(data)
+    if (props.sorted) props.data = sortBy(props.data, 'value')
+    if (props.sorted === 'd') props.data.reverse()
+    this.dataset = new Plottable.Dataset(props.data)
 
-    const total = data.reduce((sum, d) => sum + d.value, 0)
+    const total = props.data.reduce((sum, d) => sum + d.value, 0)
     const scale = new Plottable.Scales.Linear().domain([0, total])
     const colorScale = props.colorScale || new Plottable.Scales.Color()
 
@@ -113,18 +111,12 @@ export default class SimplePie extends Chart {
   }
 
   update (nextProps) {
-    if (nextProps.labels.length !== nextProps.values.length) throw new Error()
-    let data = nextProps.values
-      .map((v, i) => ({value: v, label: nextProps.labels[i]}))
-    if (this.options.sorted) data = sortBy(data, 'value')
-    if (this.options.sorted === 'd') data.reverse()
-    const total = data.reduce((sum, d) => sum + d.value, 0)
+    if (this.options.sorted) nextProps.data = sortBy(nextProps.data, 'value')
+    if (this.options.sorted === 'd') nextProps.data.reverse()
+    const total = nextProps.data.reduce((sum, d) => sum + d.value, 0)
     this.plot.sectorValue().scale.domain([0, total])
-    this.dataset.data(data)
-    Object.assign(this.options, {
-      labels: nextProps.labels,
-      values: nextProps.values
-    })
+    this.dataset.data(nextProps.data)
+    Object.assign(this.options, {data: nextProps.data})
     this.onUpdate(nextProps)
   }
 }

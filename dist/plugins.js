@@ -14,14 +14,14 @@ exports.downsampleTicks = downsampleTicks;
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-// to overwrite default highlight color,
-// add a css rule on .highlight and mark it !important
-//
-// eg.
-//
-// .highlight {
-//   fill: anotherColor!important;
-// }
+/*
+  to overwrite default highlight color,
+  add a css rule on .highlight and mark it !important. Eg.
+
+  .highlight {
+    fill: anotherColor!important;
+  }
+*/
 function highlightOnHover(component, props) {
   new Plottable.Interactions.Pointer().onPointerMove(function (point) {
     component.plot.entities().forEach(function (e) {
