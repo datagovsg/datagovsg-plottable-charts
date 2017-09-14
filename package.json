@@ -1,6 +1,6 @@
 {
   "name": "datagovsg-plottable-charts",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Reusable Plottable chart components",
   "main": "dist/index.js",
   "scripts": {

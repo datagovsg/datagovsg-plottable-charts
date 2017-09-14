@@ -33,30 +33,18 @@ export class DatagovsgSimplePie extends SimplePie {
 export class DatagovsgSimpleBar extends SimpleBar {
   constructor (props) {
     props = Object.assign({
-      fill: DATAGOVSG_COLORS[0],
       scale: getScale(),
       categoryScale: getCategoryScale(),
-      showXgridlines: true
+      color: DATAGOVSG_COLORS[0],
+      showGridlines: true
     }, props)
 
     super(props)
 
     highlightOnHover(this)
 
-    // post-process
-    this.xAxis
-      .tickLabelPadding(5)
-    this.yAxis
-      .margin(0)
-      .innerTickLength(0)
-      .endTickLength(0)
-      .tickLabelPadding(0)
-      .showEndTickLabels(true)
-      .addClass('hide-baseline')
-      .formatter(getCustomShortScaleFormatter())
-    // hack to show end tick labels
-    this.xAxis._hideOverflowingTickLabels = () => null
-    this.yAxis._hideOverflowingTickLabels = () => null
+    postprocess(this.xAxis, this.yAxis)
+    if (props.data.length > 7) this.xAxis.formatter(() => '')
   }
 }
 
@@ -65,29 +53,17 @@ export class DatagovsgHorizontalBar extends SimpleBar {
     props = Object.assign({
       orientation: 'h',
       sorted: 'd',
-      fill: DATAGOVSG_COLORS[0],
       scale: getScale(),
       categoryScale: getCategoryScale(),
-      showXgridlines: true
+      color: DATAGOVSG_COLORS[0],
+      showGridlines: true
     }, props)
 
     super(props)
 
     highlightOnHover(this)
 
-    // post-process
-    this.xAxis
-      .margin(0)
-      .innerTickLength(0)
-      .endTickLength(0)
-      .tickLabelPadding(0)
-      .showEndTickLabels(true)
-      .addClass('hide-baseline')
-      .formatter(getCustomShortScaleFormatter())
-    this.yAxis
-      .tickLabelPadding(5)
-    // hack to show end tick labels
-    this.xAxis._hideOverflowingTickLabels = () => null
+    postprocess(this.yAxis, this.xAxis)
   }
 }
 
@@ -97,7 +73,7 @@ export class DatagovsgGroupedBar extends GroupedBar {
       scale: getScale(),
       categoryScale: getCategoryScale(),
       colorScale: getColorScale(),
-      showYgridlines: true
+      showGridlines: true
     }, props)
 
     super(props)
@@ -105,20 +81,7 @@ export class DatagovsgGroupedBar extends GroupedBar {
     downsampleTicks(this)
     removeInnerPadding(this)
 
-    this.xAxis
-      .margin(2)
-      .tickLabelPadding(0)
-    this.yAxis
-      .margin(0)
-      .innerTickLength(0)
-      .endTickLength(0)
-      .tickLabelPadding(5)
-      .showEndTickLabels(true)
-      .addClass('hide-baseline')
-      .formatter(getCustomShortScaleFormatter())
-    // hack to show end tick labels
-    this.xAxis._hideOverflowingTickLabels = () => null
-    this.yAxis._hideOverflowingTickLabels = () => null
+    postprocess(this.xAxis, this.yAxis)
   }
 }
 
@@ -128,7 +91,7 @@ export class DatagovsgStackedBar extends StackedBar {
       scale: getScale(),
       categoryScale: getCategoryScale(),
       colorScale: getColorScale(),
-      showYgridlines: true
+      showGridlines: true
     }, props)
 
     super(props)
@@ -136,19 +99,41 @@ export class DatagovsgStackedBar extends StackedBar {
     downsampleTicks(this)
     removeInnerPadding(this)
 
-    this.xAxis
-      .margin(2)
-      .tickLabelPadding(0)
-    this.yAxis
-      .margin(0)
-      .innerTickLength(0)
-      .endTickLength(0)
-      .tickLabelPadding(5)
-      .showEndTickLabels(true)
-      .addClass('hide-baseline')
-      .formatter(getCustomShortScaleFormatter())
-    // hack to show end tick labels
-    this.xAxis._hideOverflowingTickLabels = () => null
-    this.yAxis._hideOverflowingTickLabels = () => null
+    postprocess(this.xAxis, this.yAxis)
   }
+}
+
+export class DatagovsgLine extends MultipleLine {
+  constructor (props) {
+    props = Object.assign({
+      yScale: getScale(),
+      xScale: getCategoryScale(),
+      colorScale: getColorScale(),
+      showYgridlines: true,
+      guideLine: 'v'
+    }, props)
+
+    super(props)
+
+    downsampleTicks(this)
+
+    postprocess(this.xAxis, this.yAxis)
+  }
+}
+
+function postprocess (primaryAxis, secondaryAxis) {
+  primaryAxis
+    .margin(12)
+    .endTickLength(0)
+    .tickLabelPadding(5)
+  secondaryAxis
+    .margin(12)
+    .innerTickLength(0)
+    .endTickLength(0)
+    .tickLabelPadding(3)
+    .showEndTickLabels(true)
+    .addClass('hide-baseline')
+    .formatter(getCustomShortScaleFormatter())
+  // hack to show end tick labels
+  secondaryAxis._hideOverflowingTickLabels = () => null
 }

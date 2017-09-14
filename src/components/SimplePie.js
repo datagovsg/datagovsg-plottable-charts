@@ -22,7 +22,7 @@ export default class SimplePie extends Chart {
    * @param {number} props.innerRadius - default 0
    * @param {number} props.outerRadius - default min(plot.height, plot.width) / 2
    * @param {Function} props.labelFormatter - optional
-   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
+   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'none'
    * @param {boolean} props.animated - default true
    * @param {Function} props.clickHandler - optional
    * @param {Function} props.hoverHandler - optional
@@ -31,12 +31,7 @@ export default class SimplePie extends Chart {
    */
   constructor (props) {
     super()
-    this.options = {
-      sorted: false,
-      innerRadius: 0,
-      legendPosition: 'none',
-      animated: true
-    }
+    this.options.legendPosition = 'none'
     props = Object.assign(this.options, props)
 
     if (props.sorted) props.data = sortBy(props.data, 'value')
@@ -63,51 +58,8 @@ export default class SimplePie extends Chart {
       this.plot.labelFormatter(props.labelFormatter).labelsEnabled(true)
     }
 
-    if (props.clickHandler) {
-      new Plottable.Interactions.Click()
-        .onClick(point => {
-          const target = this.plot.entitiesAt(point)[0]
-          props.clickHandler(target, this.plot.entities())
-        })
-        .attachTo(this.plot)
-    }
-
-    if (props.hoverHandler) {
-      new Plottable.Interactions.Pointer()
-        .onPointerMove(point => {
-          const target = this.plot.entitiesAt(point)[0]
-          props.hoverHandler(target, this.plot.entities())
-        })
-        .onPointerExit(point => {
-          props.hoverHandler(null, this.plot.entities())
-        })
-        .attachTo(this.plot)
-    }
-
-    this.legend = new Plottable.Components.Legend(colorScale)
-      .xAlignment('center')
-      .yAlignment('center')
-    if (props.legendPosition === 't') {
-      this.layout = new Plottable.Components.Table([
-        [this.legend.maxEntriesPerRow(Infinity)],
-        [this.plot]
-      ]).rowPadding(10)
-    } else if (props.legendPosition === 'r') {
-      this.layout = new Plottable.Components.Table([
-        [this.plot, this.legend]
-      ]).columnPadding(10)
-    } else if (props.legendPosition === 'b') {
-      this.layout = new Plottable.Components.Table([
-        [this.plot],
-        [this.legend.maxEntriesPerRow(Infinity)]
-      ]).rowPadding(10)
-    } else if (props.legendPosition === 'l') {
-      this.layout = new Plottable.Components.Table([
-        [this.legend, this.plot]
-      ]).columnPadding(10)
-    } else if (props.legendPosition === 'none') {
-      this.layout = this.plot
-    }
+    this._setLegend(props, colorScale)
+    this._setInteractions(props)
   }
 
   update (nextProps) {

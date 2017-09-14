@@ -29,13 +29,12 @@ export default class GroupedBar extends Chart {
    * @param {('h'|'v')} props.orientation - default 'h'
    * @param {number} props.baselineValue - default 0
    * @param {Function} props.labelFormatter - optional
+   * @param {boolean} props.showGridlines - default false
    * @param {boolean} props.hideXaxis - default false
    * @param {boolean} props.hideYaxis - default false
-   * @param {boolean} props.showXgridlines - default false
-   * @param {boolean} props.showYgridlines - default false
-   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'none'
    * @param {string} props.xLabel - optional
    * @param {string} props.yLabel - optional
+   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
    * @param {boolean} props.animated - default true
    * @param {Function} props.clickHandler - optional
    * @param {Function} props.hoverHandler - optional
@@ -44,16 +43,6 @@ export default class GroupedBar extends Chart {
    */
   constructor (props) {
     super()
-    this.options = {
-      orientation: 'v',
-      baselineValue: 0,
-      hideXaxis: false,
-      hideYaxis: false,
-      showXgridlines: false,
-      showYgridlines: false,
-      legendPosition: 'r',
-      animated: true
-    }
     props = Object.assign(this.options, props)
 
     this.datasets = props.data.map(t => new Plottable.Dataset(t.series, t.label))
@@ -81,106 +70,19 @@ export default class GroupedBar extends Chart {
       this.plot.labelFormatter(props.labelFormatter).labelsEnabled(true)
     }
 
-    if (props.clickHandler) {
-      new Plottable.Interactions.Click()
-        .onClick(point => {
-          const target = this.plot.entitiesAt(point)[0]
-          props.clickHandler(target, this.plot.entities())
-        })
-        .attachTo(this.plot)
-    }
+    this._setGridlines(props, scale)
+    const plotArea = this.gridlines
+    ? new Plottable.Components.Group([this.gridlines, this.plot])
+    : this.plot
 
-    if (props.hoverHandler) {
-      new Plottable.Interactions.Pointer()
-        .onPointerMove(point => {
-          const target = this.plot.entitiesAt(point)[0]
-          props.hoverHandler(target, this.plot.entities())
-        })
-        .onPointerExit(point => {
-          props.hoverHandler(null, this.plot.entities())
-        })
-        .attachTo(this.plot)
-    }
-
-    let plotArea
-    if (props.showXgridlines || props.showYgridlines) {
-      const xScale = (props.showXgridlines && horizontal) ? scale : null
-      const yScale = (props.showYgridlines && !horizontal) ? scale : null
-      this.gridlines = new Plottable.Components.Gridlines(xScale, yScale)
-      plotArea = new Plottable.Components.Group([this.gridlines, this.plot])
-    } else {
-      plotArea = this.plot
-    }
-
-    const _layout = new Plottable.Components.Table([
+    this.layout = new Plottable.Components.Table([
       [null, null, plotArea],
       [null, null, null],
       [null, null, null]
     ])
-    if (!props.hideXaxis) {
-      if (horizontal) {
-        this.xAxis = new Plottable.Axes.Numeric(scale, 'bottom')
-      } else {
-        this.xAxis = categoryScale instanceof Plottable.Scales.Time
-          ? new Plottable.Axes.Time(categoryScale, 'bottom')
-          : new Plottable.Axes.Category(categoryScale, 'bottom')
-      }
-      _layout.add(this.xAxis, 1, 2)
-    }
-    if (!props.hideYaxis) {
-      if (horizontal) {
-        this.yAxis = categoryScale instanceof Plottable.Scales.Time
-          ? new Plottable.Axes.Time(categoryScale, 'left')
-          : new Plottable.Axes.Category(categoryScale, 'left')
-      } else {
-        this.yAxis = new Plottable.Axes.Numeric(scale, 'left')
-      }
-      _layout.add(this.yAxis, 0, 1)
-    }
-    if (props.xLabel) {
-      _layout.add(new Plottable.Components.AxisLabel(props.xLabel), 2, 2)
-    }
-    if (props.yLabel) {
-      _layout.add(new Plottable.Components.AxisLabel(props.yLabel, -90), 0, 0)
-    }
 
-    this.legend = new Plottable.Components.Legend(colorScale)
-      .xAlignment('center')
-      .yAlignment('center')
-    if (props.legendPosition === 't') {
-      this.layout = new Plottable.Components.Table([
-        [this.legend.maxEntriesPerRow(Infinity)],
-        [_layout]
-      ]).rowPadding(10)
-    } else if (props.legendPosition === 'r') {
-      this.layout = new Plottable.Components.Table([
-        [_layout, this.legend]
-      ]).columnPadding(10)
-    } else if (props.legendPosition === 'b') {
-      this.layout = new Plottable.Components.Table([
-        [_layout],
-        [this.legend.maxEntriesPerRow(Infinity)]
-      ]).rowPadding(10)
-    } else if (props.legendPosition === 'l') {
-      this.layout = new Plottable.Components.Table([
-        [this.legend, _layout]
-      ]).columnPadding(10)
-    } else if (props.legendPosition === 'none') {
-      this.layout = _layout
-    }
-  }
-
-  update (nextProps) {
-    this.datasets = nextProps.data.map(t => new Plottable.Dataset(t.items, t.label))
-    this.plot.datasets(this.datasets)
-    if (nextProps.colorScale) {
-      this.plot.attr('fill', (d, i, dataset) => dataset.metadata(), nextProps.colorScale)
-      this.legend.colorScale(nextProps.colorScale)
-    }
-    Object.assign(this.options, {
-      data: nextProps.data,
-      colorScale: nextProps.colorScale}
-    )
-    this.onUpdate(nextProps)
+    this._setAxes(props, scale, categoryScale)
+    this._setLegend(props, colorScale)
+    this._setInteractions(props)
   }
 }
