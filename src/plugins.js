@@ -1,3 +1,5 @@
+import {getCustomTimeAxisConfigs} from './helpers'
+
 /*
   to overwrite default highlight color,
   add a css rule on .highlight and mark it !important. Eg.
@@ -372,6 +374,16 @@ export function setupOuterLabel (component, props = {labelFormatter: d => d.labe
   }
 }
 
+export function customizeTimeAxis (component, type) {
+  const axis = component.xAxis
+  if (axis instanceof Plottable.Axes.Time) {
+    axis.axisConfigurations(getCustomTimeAxisConfigs(type))
+    if (type === 'year' || type === 'financial_year') {
+      axis.tierLabelPositions(axis.tierLabelPositions().map(v => 'center'))
+    }
+  }
+}
+
 /*
   FIXME
   Very very hackish stuff
@@ -387,42 +399,39 @@ export function removeInnerPadding (component) {
 }
 
 export function downsampleTicks (component) {
-  function _downsample (axis) {
-    if (axis instanceof Plottable.Axes.Category) {
-      const renderImmediately = axis.renderImmediately
-      axis.renderImmediately = function () {
-        const minimumSpacing = d3.max(this._scale.domain(),
-          v => this._measurer.measure(v).width) * 1.5
-        const downsampleRatio = Math.ceil(minimumSpacing / this._scale.stepWidth())
-        const domain = this._scale.domain
-        const stepWidth = this._scale.stepWidth
-        this._scale.domain = function () {
-          return domain.call(this)
-            .filter((v, i) => i % downsampleRatio === 0)
-        }
-        this._scale.stepWidth = function () {
-          return stepWidth.call(this) * downsampleRatio
-        }
-        renderImmediately.call(this)
-        this._scale.domain = domain
-        this._scale.stepWidth = stepWidth
+  const axis = component.xAxis
+  if (axis instanceof Plottable.Axes.Category) {
+    console.log('called')
+    const renderImmediately = axis.renderImmediately
+    axis.renderImmediately = function () {
+      const minimumSpacing = d3.max(this._scale.domain(),
+        v => this._measurer.measure(v).width) * 1.5
+      const downsampleRatio = Math.ceil(minimumSpacing / this._scale.stepWidth())
+      const domain = this._scale.domain
+      const stepWidth = this._scale.stepWidth
+      this._scale.domain = function () {
+        return domain.call(this)
+          .filter((v, i) => i % downsampleRatio === 0)
       }
+      this._scale.stepWidth = function () {
+        return stepWidth.call(this) * downsampleRatio
+      }
+      renderImmediately.call(this)
+      this._scale.domain = domain
+      this._scale.stepWidth = stepWidth
+    }
 
-      const _measureTicks = axis._measureTicks
-      axis._measureTicks = function (...args) {
-        const wrap = this._wrapper.wrap
-        this._wrapper.wrap = function (...args) {
-          const result = wrap.call(this, ...args)
-          result.wrappedText = result.originalText
-          return result
-        }
-        const result = _measureTicks.call(this, ...args)
-        this._wrapper.wrap = wrap
+    const _measureTicks = axis._measureTicks
+    axis._measureTicks = function (...args) {
+      const wrap = this._wrapper.wrap
+      this._wrapper.wrap = function (...args) {
+        const result = wrap.call(this, ...args)
+        result.wrappedText = result.originalText
         return result
       }
+      const result = _measureTicks.call(this, ...args)
+      this._wrapper.wrap = wrap
+      return result
     }
   }
-
-  _downsample(component.xAxis)
-  _downsample(component.yAxis)
 }

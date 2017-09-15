@@ -16,7 +16,7 @@ export default class SimplePie extends Chart {
   /**
    * @param {Object} props
    * @param {string[]} props.labels - required
-   * @param {number[]} props.valuess - required
+   * @param {number[]} props.values - required
    * @param {boolean} props.sorted - default false
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
    * @param {number} props.innerRadius - default 0

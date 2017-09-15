@@ -8,15 +8,17 @@ import {
   highlightOnHover,
   setupOuterLabel,
   removeInnerPadding,
-  downsampleTicks
+  downsampleTicks,
+  customizeTimeAxis
 } from './plugins'
 
 import {
   getScale,
   getCategoryScale,
+  getTimeScale,
   getColorScale,
-  getCustomShortScaleFormatter,
-  DATAGOVSG_COLORS
+  getSingleColorScale,
+  getCustomNumberFormatter
 } from './helpers'
 
 export {SimplePie, SimpleBar, GroupedBar, StackedBar, MultipleLine}
@@ -34,16 +36,18 @@ export class DatagovsgSimpleBar extends SimpleBar {
   constructor (props) {
     props = Object.assign({
       scale: getScale(),
-      categoryScale: getCategoryScale(),
-      color: DATAGOVSG_COLORS[0],
-      showGridlines: true
+      categoryScale: props.isTimeSeries ? getTimeScale() : getCategoryScale(),
+      colorScale: props.data.length > 7 ? getColorScale() : getSingleColorScale(),
+      showGridlines: true,
+      legendPosition: props.data.length > 7 ? 'r' : 'none'
     }, props)
 
     super(props)
 
     highlightOnHover(this)
+    customizeTimeAxis(this, props.isTimeSeries)
 
-    postprocess(this.xAxis, this.yAxis)
+    postprocess(this.xAxis, this.yAxis, props)
     if (props.data.length > 7) this.xAxis.formatter(() => '')
   }
 }
@@ -55,15 +59,17 @@ export class DatagovsgHorizontalBar extends SimpleBar {
       sorted: 'd',
       scale: getScale(),
       categoryScale: getCategoryScale(),
-      color: DATAGOVSG_COLORS[0],
+      colorScale: getSingleColorScale(props.data),
       showGridlines: true
     }, props)
 
+    console.log(getSingleColorScale(props.data).range())
+
     super(props)
 
-    highlightOnHover(this)
+    highlightOnHover(this, props.isTimeSeries)
 
-    postprocess(this.yAxis, this.xAxis)
+    postprocess(this.yAxis, this.xAxis, props)
   }
 }
 
@@ -71,7 +77,7 @@ export class DatagovsgGroupedBar extends GroupedBar {
   constructor (props) {
     props = Object.assign({
       scale: getScale(),
-      categoryScale: getCategoryScale(),
+      categoryScale: props.isTimeSeries ? getTimeScale() : getCategoryScale(),
       colorScale: getColorScale(),
       showGridlines: true
     }, props)
@@ -80,8 +86,9 @@ export class DatagovsgGroupedBar extends GroupedBar {
 
     downsampleTicks(this)
     removeInnerPadding(this)
+    customizeTimeAxis(this, props.isTimeSeries)
 
-    postprocess(this.xAxis, this.yAxis)
+    postprocess(this.xAxis, this.yAxis, props)
   }
 }
 
@@ -89,7 +96,7 @@ export class DatagovsgStackedBar extends StackedBar {
   constructor (props) {
     props = Object.assign({
       scale: getScale(),
-      categoryScale: getCategoryScale(),
+      categoryScale: props.isTimeSeries ? getTimeScale() : getCategoryScale(),
       colorScale: getColorScale(),
       showGridlines: true
     }, props)
@@ -98,8 +105,9 @@ export class DatagovsgStackedBar extends StackedBar {
 
     downsampleTicks(this)
     removeInnerPadding(this)
+    customizeTimeAxis(this, props.isTimeSeries)
 
-    postprocess(this.xAxis, this.yAxis)
+    postprocess(this.xAxis, this.yAxis, props)
   }
 }
 
@@ -107,7 +115,7 @@ export class DatagovsgLine extends MultipleLine {
   constructor (props) {
     props = Object.assign({
       yScale: getScale(),
-      xScale: getCategoryScale(),
+      xScale: props.isTimeSeries ? getTimeScale() : getCategoryScale(),
       colorScale: getColorScale(),
       showYgridlines: true,
       guideLine: 'v'
@@ -116,24 +124,26 @@ export class DatagovsgLine extends MultipleLine {
     super(props)
 
     downsampleTicks(this)
+    customizeTimeAxis(this, props.isTimeSeries)
 
-    postprocess(this.xAxis, this.yAxis)
+    postprocess(this.xAxis, this.yAxis, props)
   }
 }
 
-function postprocess (primaryAxis, secondaryAxis) {
+function postprocess (primaryAxis, secondaryAxis, props = {}) {
   primaryAxis
     .margin(12)
+    .innerTickLength(5)
     .endTickLength(0)
     .tickLabelPadding(5)
   secondaryAxis
     .margin(12)
     .innerTickLength(0)
     .endTickLength(0)
-    .tickLabelPadding(3)
+    .tickLabelPadding(5)
     .showEndTickLabels(true)
     .addClass('hide-baseline')
-    .formatter(getCustomShortScaleFormatter())
+    .formatter(getCustomNumberFormatter(props.isPercentage))
   // hack to show end tick labels
   secondaryAxis._hideOverflowingTickLabels = () => null
 }

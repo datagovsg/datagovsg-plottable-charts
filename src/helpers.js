@@ -16,31 +16,30 @@ export function getColorScale () {
   return new Plottable.Scales.Color().range(DATAGOVSG_COLORS)
 }
 
-export function getTimeScale () {
-  const scale = new Plottable.Scales.Time()
-
-  // override to get Plottable to work with Moment object instead of Date object
-  scale._expandSingleValueDomain = function (singleValueDomain) {
-    const startTime = singleValueDomain[0].toDate().getTime()
-    const endTime = singleValueDomain[1].toDate().getTime()
-    if (startTime === endTime) {
-      const startDate = new Date(startTime)
-      startDate.setDate(startDate.getDate() - 1)
-      const endDate = new Date(endTime)
-      endDate.setDate(endDate.getDate() + 1)
-      return [startDate, endDate]
-    }
-    return singleValueDomain
-  }
-
-  return scale
+export function getSingleColorScale (data) {
+  return new Plottable.Scales.Color().range(data.map(d => DATAGOVSG_COLORS[0]))
 }
 
-export function getCustomShortScaleFormatter () {
-  const defaultFormatter = Plottable.Formatters.shortScale()
+export function getTimeScale () {
+  return new CustomTimeScale()
+}
 
-  return function (str) {
-    let formatted = defaultFormatter(str)
+class CustomTimeScale extends Plottable.Scales.Time {
+  _expandSingleValueDomain (singleValueDomain) {
+    const _singleValueDomain = singleValueDomain.map(v => v.toDate())
+    return super._expandSingleValueDomain(_singleValueDomain)
+  }
+}
+
+export function getCustomNumberFormatter (isPercentage) {
+  if (isPercentage) {
+    const defaultFormatter = Plottable.Formatters.general(5)
+    return v => defaultFormatter(v) + '%'
+  }
+
+  const defaultFormatter = Plottable.Formatters.shortScale()
+  return v => {
+    let formatted = defaultFormatter(v)
     if (formatted.indexOf('.') > -1) {
       formatted = formatted.replace(/\.?(0*|0{3}\d*)([KMBTQ]?)$/, '$2')
     }
@@ -49,7 +48,8 @@ export function getCustomShortScaleFormatter () {
   }
 }
 
-export function getCustomTickGenerator (targetLineCount = 5) {
+export function getCustomTickGenerator () {
+  const targetLineCount = getCustomTickGenerator.targetLineCount || 4
   return function (scale) {
     const [domainMin, domainMax] = scale.domain()
     const domainRange = domainMax - domainMin
@@ -64,18 +64,43 @@ export function getCustomTickGenerator (targetLineCount = 5) {
 }
 
 export function getCustomTimeAxisConfigs (type) {
-  // create all the configs
-  const yearSteps = [1, 5, 10, 25, 50, 100, 200, 500, 1000]
+  switch (type) {
+    case 'year':
+    case 'financial_year':
+      return yearConfigs()
+    case 'half_year':
+    case 'financial_half_year':
+      return [...halfYearConfigs(), ...yearConfigs()]
+    case 'quarter':
+    case 'financial_quarter':
+      return [...quarterConfigs(), ...yearConfigs()]
+    case 'month':
+      return [...monthConfigs(), ...yearConfigs()]
+    case 'week':
+      return [...weekConfigs(), ...yearConfigs()]
+    case 'date':
+      return [...dateConfigs(), ...monthConfigs(), ...yearConfigs()]
+    case 'date_time':
+      return [...dateTimeConfigs(), ...dateConfigs(), ...monthConfigs(), ...yearConfigs()]
+    case 'time':
+      return timeConfigs()
+  }
+}
 
-  const yearConfigs = yearSteps.map(step => (
+const yearSteps = [1, 5, 10, 25, 50, 100, 200, 500, 1000]
+
+function yearConfigs () {
+  return yearSteps.map(step => (
     [{
       interval: Plottable.TimeInterval.year,
       step: step,
       formatter: Plottable.Formatters.time('%Y')
     }]
   ))
+}
 
-  const halfYearConfigs = [
+function halfYearConfigs () {
+  return [
     [{
       interval: Plottable.TimeInterval.month,
       step: 6,
@@ -89,8 +114,10 @@ export function getCustomTimeAxisConfigs (type) {
       formatter: Plottable.Formatters.time('%Y')
     }]
   ]
+}
 
-  const quarterConfigs = [
+function quarterConfigs () {
+  return [
     [{
       interval: Plottable.TimeInterval.month,
       step: 3,
@@ -104,9 +131,11 @@ export function getCustomTimeAxisConfigs (type) {
       formatter: Plottable.Formatters.time('%Y')
     }]
   ]
+}
 
-  // use the month steps in the orginal plottable library
-  const monthConfigs = [
+// use the month steps in the orginal plottable library
+function monthConfigs () {
+  return [
     [{
       interval: Plottable.TimeInterval.month,
       step: 1,
@@ -148,8 +177,10 @@ export function getCustomTimeAxisConfigs (type) {
       formatter: Plottable.Formatters.time('%Y')
     }]
   ]
+}
 
-  const weekConfigs = [
+function weekConfigs () {
+  return [
     [{
       interval: Plottable.TimeInterval.week,
       step: 1,
@@ -164,8 +195,10 @@ export function getCustomTimeAxisConfigs (type) {
       formatter: Plottable.Formatters.time('%Y')
     }]
   ]
+}
 
-  const dateConfigs = [
+function dateConfigs () {
+  return [
     [{
       interval: Plottable.TimeInterval.day,
       step: 1,
@@ -176,14 +209,17 @@ export function getCustomTimeAxisConfigs (type) {
       formatter: Plottable.Formatters.time('%Y')
     }]
   ]
+}
 
-  const hourSteps = [1, 3, 6, 12]
-  const timeSteps = [1, 5, 10, 15, 30]
+const hourSteps = [1, 3, 6, 12]
+const timeSteps = [1, 5, 10, 15, 30]
 
-  const dateTimeConfigs = []
+function dateTimeConfigs () {
+  const configs = []
+
   hourSteps.forEach(step => {
     // hours
-    dateTimeConfigs.push(
+    configs.push(
       [{
         interval: Plottable.TimeInterval.hour,
         step: step,
@@ -196,7 +232,7 @@ export function getCustomTimeAxisConfigs (type) {
   })
   timeSteps.forEach(step => {
     // minutes
-    dateTimeConfigs.push(
+    configs.push(
       [{
         interval: Plottable.TimeInterval.minute,
         step: step,
@@ -207,7 +243,7 @@ export function getCustomTimeAxisConfigs (type) {
       }]
     )
     // seconds
-    dateTimeConfigs.push(
+    configs.push(
       [{
         interval: Plottable.TimeInterval.second,
         step: step,
@@ -219,10 +255,15 @@ export function getCustomTimeAxisConfigs (type) {
     )
   })
 
-  var timeConfigs = []
+  return configs
+}
+
+function timeConfigs () {
+  const configs = []
+
   hourSteps.forEach(step => {
     // hours
-    timeConfigs.push(
+    configs.push(
       [{
         interval: Plottable.TimeInterval.hour,
         step: step,
@@ -230,9 +271,10 @@ export function getCustomTimeAxisConfigs (type) {
       }]
     )
   })
+
   timeSteps.forEach(step => {
     // minutes
-    timeConfigs.push(
+    configs.push(
       [{
         interval: Plottable.TimeInterval.minute,
         step: step,
@@ -240,7 +282,7 @@ export function getCustomTimeAxisConfigs (type) {
       }]
     )
     // seconds
-    timeConfigs.push(
+    configs.push(
       [{
         interval: Plottable.TimeInterval.second,
         step: step,
@@ -249,25 +291,5 @@ export function getCustomTimeAxisConfigs (type) {
     )
   })
 
-  switch (type) {
-    case 'year':
-    case 'financial_year':
-      return yearConfigs
-    case 'half_year':
-    case 'financial_half_year':
-      return [...halfYearConfigs, ...yearConfigs]
-    case 'quarter':
-    case 'financial_quarter':
-      return [...quarterConfigs, ...yearConfigs]
-    case 'month':
-      return [...monthConfigs, ...yearConfigs]
-    case 'week':
-      return [...weekConfigs, ...yearConfigs]
-    case 'date':
-      return [...dateConfigs, ...monthConfigs, ...yearConfigs]
-    case 'date_time':
-      return [...dateTimeConfigs, ...dateConfigs, ...monthConfigs, ...yearConfigs]
-    case 'time':
-      return timeConfigs
-  }
+  return configs
 }

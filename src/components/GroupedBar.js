@@ -22,7 +22,7 @@ export default class GroupedBar extends Chart {
    * @param {string[]} props.labels - required
    * @param {Object[]} props.traces - required
    * @param {string[]} props.traces.labels - required
-   * @param {number[]} props.traces.valuess - required
+   * @param {number[]} props.traces.values - required
    * @param {Object} props.scale - default new Plottable.Scales.Linear()
    * @param {Object} props.categoryScale - default new Plottable.Scales.Category()
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()

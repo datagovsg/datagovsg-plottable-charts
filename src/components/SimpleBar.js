@@ -25,7 +25,7 @@ export default class SimpleBar extends Chart {
    * @param {boolean} props.sorted - default false
    * @param {Object} props.scale - default new Plottable.Scales.Linear()
    * @param {Object} props.categoryScale - default new Plottable.Scales.Category()
-   * @param {String} props.color - optional
+   * @param {Object} props.colorScale - default new Plottable.Scales.Color()
    * @param {('h'|'v')} props.orientation - default 'h'
    * @param {number} props.baselineValue - default 0
    * @param {Function} props.labelFormatter - optional
@@ -34,6 +34,7 @@ export default class SimpleBar extends Chart {
    * @param {boolean} props.hideYaxis - default false
    * @param {string} props.xLabel - optional
    * @param {string} props.yLabel - optional
+   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'none'
    * @param {boolean} props.animated - default true
    * @param {Function} props.clickHandler - optional
    * @param {Function} props.hoverHandler - optional
@@ -42,6 +43,7 @@ export default class SimpleBar extends Chart {
    */
   constructor (props) {
     super()
+    this.options.legendPosition = 'none'
     props = Object.assign(this.options, props)
 
     if (props.sorted) props.data = sortBy(props.data, 'value')
@@ -50,6 +52,7 @@ export default class SimpleBar extends Chart {
 
     const scale = props.scale || new Plottable.Scales.Linear()
     const categoryScale = props.categoryScale || new Plottable.Scales.Category()
+    const colorScale = props.colorScale || new Plottable.Scales.Color()
 
     const horizontal = props.orientation === 'h'
     const plotType = horizontal
@@ -57,7 +60,7 @@ export default class SimpleBar extends Chart {
       : Plottable.Plots.Bar.ORIENTATION_VERTICAL
     this.plot = new Plottable.Plots.Bar(plotType)
       .addDataset(this.dataset)
-      .attr('fill', props.color)
+      .attr('fill', d => d.label, colorScale)
       .labelsEnabled(false)
       .animated(props.animated)
       .baselineValue(props.baselineValue)
@@ -80,6 +83,7 @@ export default class SimpleBar extends Chart {
     ])
 
     this._setAxes(props, scale, categoryScale)
+    this._setLegend(props, colorScale)
     this._setInteractions(props)
   }
 

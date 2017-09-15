@@ -75,26 +75,23 @@ export function aggregate (labelField, valueField, type) {
   if (typeof aggregateFunc === 'function') {
     return data => data.map(g => {
       const grouped = _groupBy(g._items, labelField)
-      let series = []
+      const series = []
+      let decimalPlaces = 0
       Object.keys(grouped).forEach(label => {
         const values = grouped[label]
           .map(d => +_get(d, valueField))
           .filter(d => !isNull(d))
         if (values.length > 0) {
           // cap decimal place of aggregated value to max dp of original data
-          let dpCap
-          values.forEach(v => {
-            v = v.toString()
-            const dpIndex = v.indexOf('.') + 1
-            if (dpIndex > 0) {
-              dpCap = Math.max(v.length - dpIndex, dpCap)
-            }
-          })
-          dpCap = Math.min(dpCap, 10)
-          series.push({label, value: +aggregateFunc(values).toFixed(dpCap)})
+          decimalPlaces = Math.max(decimalPlaces, getDecimalPlaces(values))
+          series.push({label, value: aggregateFunc(values)})
         }
       })
-      g._summaries.push({type, labelField, valueField, series})
+      decimalPlaces = Math.min(decimalPlaces, 10)
+      series.forEach(d => {
+        d.value = +d.value.toFixed(decimalPlaces)
+      })
+      g._summaries.push({type, labelField, valueField, decimalPlaces, series})
       return g
     })
   }
@@ -126,4 +123,13 @@ function isNull (value) {
   var nullValues = ['na', '-', 's']
   return (!value && value !== 0) ||
     nullValues.indexOf(value.toString().trim().toLowerCase()) > -1
+}
+
+function getDecimalPlaces (values) {
+  return values.reduce((max, v) => {
+    const _v = v.toString()
+    const dpIndex = _v.indexOf('.') + 1
+    if (dpIndex > 0) return Math.max(_v.length - dpIndex, max)
+    return max
+  }, 0)
 }
