@@ -4,7 +4,9 @@
   "description": "Reusable Plottable chart components",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rm -rf dist/ && mkdir -p dist && babel src --out-dir dist",
+    "build": "npm run babel && npm run rollup",
+    "babel": "rm -r dist/ && mkdir -p dist/ && babel src/ --out-dir dist/",
+    "rollup": "rollup --config && MINIFY=true rollup --config",
     "test": "standard src/**/*.js",
     "prepublish": "npm run build"
   },
@@ -22,10 +24,17 @@
     "lodash": "^4.17.4"
   },
   "devDependencies": {
-    "babel-cli": "^6.18.0",
+    "babel-cli": "^6.26.0",
+    "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-es2015": "^6.18.0",
     "babel-preset-stage-2": "^6.18.0",
-    "standard": "^8.5.0"
+    "rollup": "^0.50.0",
+    "rollup-plugin-babel": "^3.0.2",
+    "rollup-plugin-commonjs": "^8.2.1",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-uglify": "^2.0.1",
+    "standard": "^8.5.0",
+    "uglify-es": "^3.1.1"
   },
   "babel": {
     "presets": [

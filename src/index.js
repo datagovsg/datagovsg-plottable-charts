@@ -37,9 +37,8 @@ export class DatagovsgSimpleBar extends SimpleBar {
     props = Object.assign({
       scale: getScale(),
       categoryScale: props.isTimeSeries ? getTimeScale() : getCategoryScale(),
-      colorScale: props.data.length > 7 ? getColorScale() : getSingleColorScale(),
-      showGridlines: true,
-      legendPosition: props.data.length > 7 ? 'r' : 'none'
+      colorScale: getSingleColorScale(props.data),
+      showGridlines: true
     }, props)
 
     super(props)
@@ -48,7 +47,6 @@ export class DatagovsgSimpleBar extends SimpleBar {
     customizeTimeAxis(this, props.isTimeSeries)
 
     postprocess(this.xAxis, this.yAxis, props)
-    if (props.data.length > 7) this.xAxis.formatter(() => '')
   }
 }
 
@@ -62,8 +60,6 @@ export class DatagovsgHorizontalBar extends SimpleBar {
       colorScale: getSingleColorScale(props.data),
       showGridlines: true
     }, props)
-
-    console.log(getSingleColorScale(props.data).range())
 
     super(props)
 
