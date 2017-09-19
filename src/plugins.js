@@ -401,7 +401,6 @@ export function removeInnerPadding (component) {
 export function downsampleTicks (component) {
   const axis = component.xAxis
   if (axis instanceof Plottable.Axes.Category) {
-    console.log('called')
     const renderImmediately = axis.renderImmediately
     axis.renderImmediately = function () {
       const minimumSpacing = d3.max(this._scale.domain(),

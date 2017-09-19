@@ -25,6 +25,10 @@ export {SimplePie, SimpleBar, GroupedBar, StackedBar, MultipleLine}
 
 export class DatagovsgSimplePie extends SimplePie {
   constructor (props) {
+    props = Object.assign({
+      colorScale: getColorScale()
+    }, props)
+
     super(props)
 
     highlightOnHover(this)
@@ -66,6 +70,7 @@ export class DatagovsgHorizontalBar extends SimpleBar {
     highlightOnHover(this, props.isTimeSeries)
 
     postprocess(this.yAxis, this.xAxis, props)
+    this.xAxis.tickLabelPadding(0)
   }
 }
 

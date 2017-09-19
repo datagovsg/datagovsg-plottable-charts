@@ -58,6 +58,8 @@ export default class SimplePie extends Chart {
       this.plot.labelFormatter(props.labelFormatter).labelsEnabled(true)
     }
 
+    this.layout = this.plot
+
     this._setLegend(props, colorScale)
     this._setInteractions(props)
   }

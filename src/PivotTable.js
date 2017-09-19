@@ -11,8 +11,8 @@ export default class PivotTable {
     this.transformations = []
   }
 
-  push (fn) {
-    this.transformations.push(fn)
+  push (...args) {
+    this.transformations.push(...args)
   }
 
   transform (data) {
@@ -67,7 +67,7 @@ export function groupItems (field) {
   }
 }
 
-export function aggregate (labelField, valueField, type) {
+export function aggregate (labelField, valueField, type = 'sum') {
   if (typeof labelField !== 'string') throw new TypeError()
   if (typeof valueField !== 'string') throw new TypeError()
   const aggregateFunc = (typeof type === 'string' && type in aggregateFunctions)
