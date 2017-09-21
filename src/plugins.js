@@ -404,7 +404,7 @@ export function downsampleTicks (component) {
     const renderImmediately = axis.renderImmediately
     axis.renderImmediately = function () {
       const minimumSpacing = d3.max(this._scale.domain(),
-        v => this._measurer.measure(v).width) * 1.5
+        v => this._measurer.measure(v.toString()).width) * 1.5
       const downsampleRatio = Math.ceil(minimumSpacing / this._scale.stepWidth())
       const domain = this._scale.domain
       const stepWidth = this._scale.stepWidth

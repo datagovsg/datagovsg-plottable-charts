@@ -41,13 +41,14 @@ export class DatagovsgSimpleBar extends SimpleBar {
     props = Object.assign({
       scale: getScale(),
       categoryScale: props.isTimeSeries ? getTimeScale() : getCategoryScale(),
-      colorScale: getSingleColorScale(props.data),
+      colorScale: getSingleColorScale(),
       showGridlines: true
     }, props)
 
     super(props)
 
     highlightOnHover(this)
+    downsampleTicks(this)
     customizeTimeAxis(this, props.isTimeSeries)
 
     postprocess(this.xAxis, this.yAxis, props)
@@ -61,7 +62,7 @@ export class DatagovsgHorizontalBar extends SimpleBar {
       sorted: 'd',
       scale: getScale(),
       categoryScale: getCategoryScale(),
-      colorScale: getSingleColorScale(props.data),
+      colorScale: getSingleColorScale(),
       showGridlines: true
     }, props)
 

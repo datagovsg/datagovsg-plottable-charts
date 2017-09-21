@@ -16,8 +16,12 @@ export function getColorScale () {
   return new Plottable.Scales.Color().range(DATAGOVSG_COLORS)
 }
 
-export function getSingleColorScale (data) {
-  return new Plottable.Scales.Color().range(data.map(d => DATAGOVSG_COLORS[0]))
+export function getSingleColorScale () {
+  const scale = new Plottable.Scales.Color().range([DATAGOVSG_COLORS[0]])
+  scale.scale = function (value) {
+    return this._d3Scale(value)
+  }
+  return scale
 }
 
 export function getTimeScale () {
