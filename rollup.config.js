@@ -4,7 +4,7 @@ import babel from 'rollup-plugin-babel'
 import uglify from 'rollup-plugin-uglify'
 import {minify} from 'uglify-es'
 
-const outputFile = process.env.MINIFY === 'true'
+const outputFile = process.env.ROLLUP_ENV === 'minify'
    ? 'lib/datagovsg-charts.min.js'
    : 'lib/datagovsg-charts.js'
 
@@ -12,7 +12,7 @@ const config = {
   input: 'src/lib.js',
   output: {
     file: outputFile,
-    format: 'es'
+    format: 'iife'
   },
   plugins: [
     commonjs(),
@@ -31,7 +31,7 @@ const config = {
   ]
 }
 
-if (process.env.MINIFY === 'true') {
+if (process.env.ROLLUP_ENV === 'minify') {
   config.plugins.push(uglify({}, minify))
 }
 

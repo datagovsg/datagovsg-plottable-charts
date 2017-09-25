@@ -1,12 +1,13 @@
 {
   "name": "datagovsg-plottable-charts",
-  "version": "3.0.2",
+  "version": "3.1.1",
   "description": "Reusable Plottable chart components",
   "main": "dist/index.js",
+  "module": "dist/es/index.js",
   "scripts": {
     "build": "npm run babel && npm run rollup",
-    "babel": "rm -r dist/ && mkdir -p dist/ && babel src/ --out-dir dist/",
-    "rollup": "rollup --config && MINIFY=true rollup --config",
+    "babel": "rm -r dist/ && mkdir -p dist/ && mkdir -p dist/es/ && BABEL_ENV=commonjs babel src/ --out-dir dist/ && babel src/ --out-dir dist/es/",
+    "rollup": "rollup --config && ROLLUP_ENV=minify rollup --config",
     "test": "standard src/**/*.js",
     "prepublish": "npm run build"
   },
@@ -38,9 +39,16 @@
   },
   "babel": {
     "presets": [
-      "es2015",
+      ["es2015", {"modules": false}],
       "stage-2"
-    ]
+    ],
+    "env": {
+      "commonjs": {
+        "plugins": [
+          "transform-es2015-modules-commonjs"
+        ]
+      }
+    }
   },
   "standard": {
     "globals": [
