@@ -1,13 +1,12 @@
 {
   "name": "datagovsg-plottable-charts",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "Reusable Plottable chart components",
-  "main": "dist/index.js",
-  "module": "dist/es/index.js",
+  "main": "src/index.js",
   "scripts": {
     "build": "npm run babel && npm run rollup",
     "babel": "rm -r dist/ && mkdir -p dist/ && mkdir -p dist/es/ && BABEL_ENV=commonjs babel src/ --out-dir dist/ && babel src/ --out-dir dist/es/",
-    "rollup": "rollup --config && ROLLUP_ENV=minify rollup --config",
+    "rollup": "OUTPUT_PATH=lib/datagovsg-charts.js rollup --config && OUTPUT_PATH=lib/datagovsg-charts.min.js rollup --config && OUTPUT_PATH=lib/pivot-table.js rollup --config && OUTPUT_PATH=lib/pivot-table.min.js rollup --config",
     "test": "standard src/**/*.js",
     "prepublish": "npm run build"
   },

@@ -31,20 +31,37 @@ export default class PivotTable {
 }
 
 export function filterItems (field, filter) {
-  const filterFunc = (function (field, filter) {
-    if (typeof field === 'function') return items => items.filter(field)
-    if (typeof field !== 'string') throw new TypeError()
-    if (typeof filter === 'object') {
-      if (filter.type === 'include' && filter.values instanceof Array) {
-        return items => items.filter(d => filter.values.indexOf(_get(d, field)) > -1)
+  const filterFunc = (function (_field, _filter) {
+    if (typeof _field === 'function') return _field
+    if (typeof _field !== 'string') throw new TypeError()
+    if (typeof _filter === 'object') {
+      if (_filter.type === 'include' && _filter.values instanceof Array) {
+        return d => _filter.values.indexOf(_get(d, _field)) > -1
       }
-      if (filter.type === 'exclude' && filter.values instanceof Array) {
-        return items => items.filter(d => filter.values.indexOf(_get(d, field)) < 0)
+      if (_filter.type === 'exclude' && _filter.values instanceof Array) {
+        return d => _filter.values.indexOf(_get(d, _field)) < 0
       }
     }
     throw new TypeError()
   })(field, filter)
-  return data => data.map(g => Object.assign({}, g, {_items: filterFunc(g._items)}))
+  return data => data.map(g => Object.assign({}, g, {_items: g._items.filter(filterFunc)}))
+}
+
+export function filterGroups (field, filter) {
+  const filterFunc = (function (_field, _filter) {
+    if (typeof _field === 'function') return _field
+    if (typeof _field !== 'string') throw new TypeError()
+    if (typeof _filter === 'object') {
+      if (_filter.type === 'include' && _filter.values instanceof Array) {
+        return g => _filter.values.indexOf(_get(g, _field)) > -1
+      }
+      if (_filter.type === 'exclude' && _filter.values instanceof Array) {
+        return g => _filter.values.indexOf(_get(g, _field)) < 0
+      }
+    }
+    throw new TypeError()
+  })(field, filter)
+  return data => data.filter(g => filterFunc(g._group))
 }
 
 export function groupItems (field) {
