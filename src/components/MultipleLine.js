@@ -48,8 +48,6 @@ export default class MultipleLine extends Chart {
     super()
     props = Object.assign(this.options, props)
 
-    this.datasets = props.data.map(t => new Plottable.Dataset(t.series, t.label))
-
     const scale = props.yScale || new Plottable.Scales.Linear()
     const categoryScale = props.xScale || new Plottable.Scales.Linear()
     const colorScale = props.colorScale || new Plottable.Scales.Color()
@@ -68,10 +66,13 @@ export default class MultipleLine extends Chart {
         .size(props.markerSize)
     }
 
-    this.datasets.forEach(dataset => {
-      this.plot.lines.addDataset(dataset)
-      this.plot.markers.addDataset(dataset)
-    })
+    if (props.data) {
+      this.datasets = props.data.map(s => new Plottable.Dataset(s.series, s.label))
+      this.datasets.forEach(dataset => {
+        this.plot.lines.addDataset(dataset)
+        this.plot.markers.addDataset(dataset)
+      })
+    }
 
     if (props.clickHandler) {
       new Plottable.Interactions.Click()
@@ -187,5 +188,13 @@ export default class MultipleLine extends Chart {
     }
 
     this._setLegend(props, colorScale)
+  }
+
+  update (nextProps) {
+    this.datasets = nextProps.data.map(s => new Plottable.Dataset(s.series, s.label))
+    this.plot.lines.datasets(this.datasets)
+    this.plot.markers.datasets(this.datasets)
+    this.options.data = nextProps.data
+    this.onUpdate(nextProps)
   }
 }

@@ -45,8 +45,6 @@ export default class StackedBar extends Chart {
     super()
     props = Object.assign(this.options, props)
 
-    this.datasets = props.data.map(t => new Plottable.Dataset(t.series, t.label))
-
     const scale = props.scale || new Plottable.Scales.Linear()
     const categoryScale = props.categoryScale || new Plottable.Scales.Category()
     const colorScale = props.colorScale || new Plottable.Scales.Color()
@@ -62,9 +60,13 @@ export default class StackedBar extends Chart {
       .baselineValue(props.baselineValue)
     this.plot[horizontal ? 'x' : 'y'](d => d.value, scale)
     this.plot[horizontal ? 'y' : 'x'](d => d.label, categoryScale)
-    this.datasets.forEach(dataset => {
-      this.plot.addDataset(dataset)
-    })
+
+    if (props.data) {
+      this.datasets = props.data.map(s => new Plottable.Dataset(s.series, s.label))
+      this.datasets.forEach(dataset => {
+        this.plot.addDataset(dataset)
+      })
+    }
 
     if (props.labelFormatter) {
       this.plot.labelFormatter(this.props.labelFormatter).labelsEnabled(true)

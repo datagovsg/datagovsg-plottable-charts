@@ -26,7 +26,7 @@ export default class Chart {
   }
 
   update (nextProps) {
-    this.datasets = nextProps.data.map(s => new Plottable.Dataset(s.items, s.label))
+    this.datasets = nextProps.data.map(s => new Plottable.Dataset(s.series, s.label))
     this.plot.datasets(this.datasets)
     this.options.data = nextProps.data
     this.onUpdate(nextProps)
