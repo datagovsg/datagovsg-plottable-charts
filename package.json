@@ -1,8 +1,9 @@
 {
   "name": "datagovsg-plottable-charts",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "Reusable Plottable chart components",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "module": "dist/es/index.js",
   "scripts": {
     "build": "npm run babel && npm run rollup",
     "babel": "rm -r dist/ && mkdir -p dist/ && mkdir -p dist/es/ && BABEL_ENV=commonjs babel src/ --out-dir dist/ && babel src/ --out-dir dist/es/",
