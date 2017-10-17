@@ -5,26 +5,55 @@ import {getCustomTimeAxisConfigs} from './helpers'
   add a css rule on .highlight and mark it !important. Eg.
 
   .highlight {
+    stroke: anotherColor!important;
     fill: anotherColor!important;
   }
 */
 export function highlightOnHover (component, props) {
-  new Plottable.Interactions.Pointer()
-    .onPointerMove(point => {
-      component.plot.entities().forEach(e => {
-        e.selection.classed('highlight', false).style('fill', '')
+  if (component.plot.markers) {
+    new Plottable.Interactions.Pointer()
+      .onPointerMove(point => {
+        component.plot.markers.entities().forEach(e => {
+          e.selection
+            .classed('highlight', false)
+            .style('stroke', '')
+            .style('fill', '')
+        })
+        const target = component.plot.markers.entityNearest(point)
+        if (target) {
+          target.selection
+            .classed('highlight', true)
+            .style('stroke', 'black')
+            .style('fill', 'white')
+        }
       })
-      const target = component.plot.entitiesAt(point)[0]
-      if (target) {
-        target.selection.classed('highlight', true).style('fill', 'lightgrey')
-      }
-    })
-    .onPointerExit(point => {
-      component.plot.entities().forEach(e => {
-        e.selection.classed('highlight', false).style('fill', '')
+      .onPointerExit(point => {
+        component.plot.markers.entities().forEach(e => {
+          e.selection
+            .classed('highlight', false)
+            .style('stroke', '')
+            .style('fill', '')
+        })
       })
-    })
-    .attachTo(component.plot)
+      .attachTo(component.plot.markers)
+  } else {
+    new Plottable.Interactions.Pointer()
+      .onPointerMove(point => {
+        component.plot.entities().forEach(e => {
+          e.selection.classed('highlight', false).style('fill', '')
+        })
+        const target = component.plot.entitiesAt(point)[0]
+        if (target) {
+          target.selection.classed('highlight', true).style('fill', 'lightgrey')
+        }
+      })
+      .onPointerExit(point => {
+        component.plot.entities().forEach(e => {
+          e.selection.classed('highlight', false).style('fill', '')
+        })
+      })
+      .attachTo(component.plot)
+  }
 }
 
 /**
@@ -64,6 +93,23 @@ export function setupTooltip (component, props) {
         else return 'left'
       }
     })
+
+    if (component.plot.markers) {
+      new Plottable.Interactions.Pointer()
+        .onPointerMove(point => {
+          component.plot.markers.entities().forEach(e => {
+            $(e.selection.node()).tooltip('hide')
+          })
+          const target = component.plot.markers.entityNearest(point)
+          if (target) $(target.selection.node()).tooltip('show')
+        })
+        .onPointerExit(point => {
+          component.plot.markers.entities().forEach(e => {
+            $(e.selection.node()).tooltip('hide')
+          })
+        })
+        .attachTo(component.plot.markers)
+    }
   }
 
   component.onUnmount = function () {
@@ -111,6 +157,23 @@ export function setupPopover (component, props) {
         else return 'left'
       }
     })
+
+    if (component.plot.markers) {
+      new Plottable.Interactions.Pointer()
+        .onPointerMove(point => {
+          component.plot.markers.entities().forEach(e => {
+            $(e.selection.node()).popover('hide')
+          })
+          const target = component.plot.markers.entityNearest(point)
+          if (target) $(target.selection.node()).popover('show')
+        })
+        .onPointerExit(point => {
+          component.plot.markers.entities().forEach(e => {
+            $(e.selection.node()).popover('hide')
+          })
+        })
+        .attachTo(component.plot.markers)
+    }
   }
 
   component.onUnmount = function () {

@@ -5,7 +5,6 @@ import StackedBar from './components/StackedBar'
 import MultipleLine from './components/MultipleLine'
 
 import {
-  highlightOnHover,
   setupOuterLabel,
   removeInnerPadding,
   downsampleTicks,
@@ -31,7 +30,6 @@ export class DatagovsgSimplePie extends SimplePie {
 
     super(props)
 
-    highlightOnHover(this)
     setupOuterLabel(this, {labelFormatter: d => d.label})
   }
 }
@@ -47,7 +45,6 @@ export class DatagovsgSimpleBar extends SimpleBar {
 
     super(props)
 
-    highlightOnHover(this)
     downsampleTicks(this)
     customizeTimeAxis(this, props.isTimeSeries)
 
@@ -67,8 +64,6 @@ export class DatagovsgHorizontalBar extends SimpleBar {
     }, props)
 
     super(props)
-
-    highlightOnHover(this, props.isTimeSeries)
 
     postprocess(this.yAxis, this.xAxis, props)
     this.xAxis.tickLabelPadding(0)
@@ -136,7 +131,7 @@ function postprocess (primaryAxis, secondaryAxis, props = {}) {
   primaryAxis
     .margin(12)
     .innerTickLength(5)
-    .endTickLength(0)
+    .endTickLength(5)
     .tickLabelPadding(5)
   secondaryAxis
     .margin(12)

@@ -21,7 +21,7 @@
 }
 
 .datagovsg-chart.plottable .axis.hide-baseline .tick-mark, .datagovsg-chart.plottable .axis.hide-baseline .baseline {
-  visibility: hidden !important;
+  visibility: hidden!important;
 }
 
 .datagovsg-chart.plottable .axis-label text {
@@ -72,6 +72,6 @@
   opacity: 0.7;
 }
 
-.datagovsg-chart.plottable .highlight {
-  fill: #DEDEDE !important;
+.datagovsg-chart.plottable rect.highlight {
+  fill: #DEDEDE!important;
 }
