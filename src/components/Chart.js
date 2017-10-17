@@ -130,6 +130,7 @@ export default class Chart {
   }
 
   mount (element) {
+    element.classList.add('datagovsg-chart')
     this.layout.renderTo(element)
     window.addEventListener('resize', this.resizeHandler)
     this.onMount(element)
