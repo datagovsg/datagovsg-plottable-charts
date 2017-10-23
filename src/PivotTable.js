@@ -69,12 +69,17 @@ export function groupItems (field) {
   return data => {
     const result = []
     data.forEach(g => {
+      const labels = {}
+      g._items.forEach(d => {
+        const groupValue = _get(d, field)
+        labels[groupValue] = groupValue
+      })
       const grouped = _groupBy(g._items, d => _get(d, field))
-      Object.keys(grouped).forEach(groupValue => {
-        const items = grouped[groupValue]
+      Object.keys(grouped).forEach(groupKey => {
+        const items = grouped[groupKey]
         if (items.length === 0) return
         result.push({
-          _group: Object.assign({}, g._group, {[field]: groupValue}),
+          _group: Object.assign({}, g._group, {[field]: labels[groupKey]}),
           _items: items,
           _summaries: []
         })
@@ -91,11 +96,17 @@ export function aggregate (labelField, valueField, type = 'sum') {
     ? aggregateFunctions[type] : type
   if (typeof aggregateFunc === 'function') {
     return data => data.map(g => {
-      const grouped = _groupBy(g._items, labelField)
+      const labels = {}
+      g._items.forEach(d => {
+        const groupValue = _get(d, labelField)
+        labels[groupValue] = groupValue
+      })
+      const grouped = _groupBy(g._items, d => _get(d, labelField))
       const series = []
       let decimalPlaces = 0
-      Object.keys(grouped).forEach(label => {
-        const values = grouped[label]
+      Object.keys(grouped).forEach(groupKey => {
+        const label = labels[groupKey]
+        const values = grouped[groupKey]
           .map(d => +_get(d, valueField))
           .filter(d => !isNull(d))
         if (values.length > 0) {
