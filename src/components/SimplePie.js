@@ -2,7 +2,7 @@ import Chart from './Chart'
 import sortBy from 'lodash/sortBy'
 
 /**
- * @typedef {Object} SimplePie
+ * @typedef {Object} Chart
  * @property {Object} layout
  * @property {Object} plot
  * @property {Object} legend
@@ -10,13 +10,16 @@ import sortBy from 'lodash/sortBy'
  * @property {Function} update
  * @property {Function} unmount
  * @property {Object} options
+ *
+ * @typedef {Object} DataPoint
+ * @property {string[]} label - required
+ * @property {number[]} value - required
  */
 
 export default class SimplePie extends Chart {
   /**
    * @param {Object} props
-   * @param {string[]} props.labels - required
-   * @param {number[]} props.values - required
+   * @param {DataPoint[]} props.data
    * @param {boolean} props.sorted - default false
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
    * @param {number} props.innerRadius - default 0
@@ -27,7 +30,7 @@ export default class SimplePie extends Chart {
    * @param {Function} props.clickHandler - optional
    * @param {Function} props.hoverHandler - optional
    *
-   * @return {SimplePie}
+   * @return {Chart}
    */
   constructor (props) {
     super()

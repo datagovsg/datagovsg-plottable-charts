@@ -2,7 +2,7 @@ import Chart from './Chart'
 import sortBy from 'lodash/sortBy'
 
 /**
- * @typedef {Object} SimpleBar
+ * @typedef {Object} Chart
  * @property {Object} layout
  * @property {Object} plot
  * @property {Object} legend
@@ -15,13 +15,16 @@ import sortBy from 'lodash/sortBy'
  * @property {Function} update
  * @property {Function} unmount
  * @property {Object} options
+ *
+ * @typedef {Object} DataPoint
+ * @property {string[]} label - required
+ * @property {number[]} value - required
  */
 
 export default class SimpleBar extends Chart {
   /**
    * @param {Object} props
-   * @param {string[]} props.labels - required
-   * @param {number[]} props.values - required
+   * @param {DataPoint[]} props.data
    * @param {boolean} props.sorted - default false
    * @param {Object} props.scale - default new Plottable.Scales.Linear()
    * @param {Object} props.categoryScale - default new Plottable.Scales.Category()
@@ -39,7 +42,7 @@ export default class SimpleBar extends Chart {
    * @param {Function} props.clickHandler - optional
    * @param {Function} props.hoverHandler - optional
    *
-   * @return {SimpleBar}
+   * @return {Chart}
    */
   constructor (props) {
     super()

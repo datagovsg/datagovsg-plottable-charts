@@ -1,15 +1,24 @@
 import {getCustomTimeAxisConfigs} from './helpers'
 
-/*
-  to overwrite default highlight color,
-  add a css rule on .highlight and mark it !important. Eg.
+/**
+ * @callback {Function} Accessor
+ * @param {Object} datum
+ * @param {number} index
+ * @param {Object} dataset
+ *
+ * @return {string}
+ */
 
-  .highlight {
-    stroke: anotherColor!important;
-    fill: anotherColor!important;
-  }
-*/
-export function highlightOnHover (component, props) {
+/**
+ * to overwrite default highlight color,
+ * add a css rule on .highlight and mark it !important. Eg.
+ *
+ * .highlight {
+ *   stroke: anotherColor !important;
+ *   fill: anotherColor !important;
+ * }
+ */
+export function highlightOnHover (component) {
   if (component.plot.markers) {
     new Plottable.Interactions.Pointer()
       .onPointerMove(point => {
@@ -57,7 +66,7 @@ export function highlightOnHover (component, props) {
 }
 
 /**
- * @param {Function} props.title - required
+ * @param {Accessor} props.title - required
  */
 export function setupTooltip (component, props) {
   const plot = component.plot.markers || component.plot
@@ -118,8 +127,8 @@ export function setupTooltip (component, props) {
 }
 
 /**
- * @param {Function} props.title - required
- * @param {Function} props.content - optional
+ * @param {Accessor} props.title - required
+ * @param {Accessor} props.content - optional
  */
 export function setupPopover (component, props) {
   const plot = component.plot.markers || component.plot
@@ -182,8 +191,8 @@ export function setupPopover (component, props) {
 }
 
 /**
- * @param {Function} props.title - required
- * @param {Function} props.content - optional
+ * @param {Accessor} props.title - required
+ * @param {Accessor} props.content - optional
  */
 export function setupPopoverOnGuideLine (component, props) {
   let $guideLine
@@ -246,8 +255,8 @@ export function setupPopoverOnGuideLine (component, props) {
 }
 
 /**
- * @param {Function} props.title - required
- * @param {Function} props.content - optional
+ * @param {Accessor} props.title - required
+ * @param {Accessor} props.content - optional
  */
 export function setupShadowWithPopover (component, props) {
   const plotArea = component.plot.parent()
@@ -354,7 +363,7 @@ export function setupShadowWithPopover (component, props) {
 }
 
 /**
- * @param {Function} props.labelFormatter - default d => d.label
+ * @param {Accessor} props.labelFormatter - default d => d.label
  */
 export function setupOuterLabel (component, props = {labelFormatter: d => d.label}) {
   component.plot.outerRadius(d => {
@@ -437,21 +446,36 @@ export function setupOuterLabel (component, props = {labelFormatter: d => d.labe
   }
 }
 
+/**
+ * type can be one of the following
+ *   'year'
+ *   'financial_year'
+ *   'half_year'
+ *   'financial_half_year'
+ *   'quarter'
+ *   'financial_quarter'
+ *   'month'
+ *   'week'
+ *   'date'
+ *   'datetime'
+ *   'time'
+ */
 export function customizeTimeAxis (component, type) {
   const axis = component.xAxis
   if (axis instanceof Plottable.Axes.Time) {
-    axis.axisConfigurations(getCustomTimeAxisConfigs(type))
+    const customTimeAxisConfigs = getCustomTimeAxisConfigs(type)
+    axis.axisConfigurations(customTimeAxisConfigs)
     if (type === 'year' || type === 'financial_year') {
-      axis.tierLabelPositions(axis.tierLabelPositions().map(v => 'center'))
+      axis.tierLabelPositions(customTimeAxisConfigs.map(v => 'center'))
     }
   }
 }
 
-/*
-  FIXME
-  Very very hackish stuff
-  Might break when upgrading to Plottable 3.0
-*/
+/**
+ * FIXME
+ * Very very hackish stuff
+ * Might break when upgrading to Plottable 3.0
+ */
 
 export function removeInnerPadding (component) {
   const _makeInnerScale = component.plot._makeInnerScale

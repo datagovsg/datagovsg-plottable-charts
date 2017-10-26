@@ -1,5 +1,15 @@
 import range from 'lodash/range'
 
+export const DATAGOVSG_CONFIG = {
+  getCategoryScale: {
+    innerPadding: 0.4,
+    outerPadding: 0.2
+  },
+  getCustomTickGenerator: {
+    targetLineCount: 4
+  }
+}
+
 export const DATAGOVSG_COLORS =
   ['#C64D26', '#FF7733', '#415961', '#65828A', '#B2D0D8', '#DAE3E8']
 
@@ -8,8 +18,11 @@ export function getScale () {
     .tickGenerator(getCustomTickGenerator())
 }
 
-export function getCategoryScale (type) {
-  return new Plottable.Scales.Category().outerPadding(0.2)
+export function getCategoryScale () {
+  const {innerPadding, outerPadding} = DATAGOVSG_CONFIG.getCategoryScale
+  return new Plottable.Scales.Category()
+    .innerPadding(innerPadding)
+    .outerPadding(outerPadding)
 }
 
 export function getColorScale () {
@@ -53,7 +66,7 @@ export function getCustomNumberFormatter (isPercentage) {
 }
 
 export function getCustomTickGenerator () {
-  const targetLineCount = getCustomTickGenerator.targetLineCount || 4
+  const {targetLineCount} = DATAGOVSG_CONFIG.getCustomTickGenerator
   return function (scale) {
     const [domainMin, domainMax] = scale.domain()
     const domainRange = domainMax - domainMin

@@ -1,7 +1,7 @@
 import Chart from './Chart'
 
 /**
- * @typedef {Object} MultipleLine
+ * @typedef {Object} Chart
  * @property {Object} layout
  * @property {Object} plot.lines
  * @property {Object} plot.markers
@@ -17,15 +17,20 @@ import Chart from './Chart'
  * @property {Function} update
  * @property {Function} unmount
  * @property {Object} options
+ *
+ * @typedef {Object} DataSeries
+ * @property {string[]} label - required
+ * @property {DataPoint[]} series - required
+ *
+ * @typedef {Object} DataPoint
+ * @property {string[]} label - required
+ * @property {number[]} value - required
  */
 
 export default class MultipleLine extends Chart {
   /**
    * @param {Object} props
-   * @param {string[]} props.labels - required
-   * @param {Object[]} props.traces - required
-   * @param {number[]} props.traces.x - required
-   * @param {number[]} props.traces.y - required
+   * @param {DataSeries[]} props.data
    * @param {Object} props.xScale - default new Plottable.Scales.Linear()
    * @param {Object} props.yScale - default new Plottable.Scales.Linear()
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
@@ -42,7 +47,7 @@ export default class MultipleLine extends Chart {
    * @param {Function} props.clickHandler - optional
    * @param {Function} props.hoverHandler - optional
    *
-   * @return {MultipleLine}
+   * @return {Chart}
    */
   constructor (props) {
     super()

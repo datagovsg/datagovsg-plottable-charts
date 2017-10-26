@@ -35,6 +35,10 @@ export class DatagovsgSimplePie extends SimplePie {
 }
 
 export class DatagovsgSimpleBar extends SimpleBar {
+  /**
+   * @param {boolean|string} props.isTimeSeries - default false
+   * @param {boolean} props.isPercentage - default false
+   */
   constructor (props) {
     props = Object.assign({
       scale: getScale(),
@@ -53,6 +57,9 @@ export class DatagovsgSimpleBar extends SimpleBar {
 }
 
 export class DatagovsgHorizontalBar extends SimpleBar {
+  /**
+   * @param {boolean} props.isPercentage - default false
+   */
   constructor (props) {
     props = Object.assign({
       orientation: 'h',
@@ -71,6 +78,10 @@ export class DatagovsgHorizontalBar extends SimpleBar {
 }
 
 export class DatagovsgGroupedBar extends GroupedBar {
+  /**
+   * @param {boolean|string} props.isTimeSeries - default false
+   * @param {boolean} props.isPercentage - default false
+   */
   constructor (props) {
     props = Object.assign({
       scale: getScale(),
@@ -90,6 +101,10 @@ export class DatagovsgGroupedBar extends GroupedBar {
 }
 
 export class DatagovsgStackedBar extends StackedBar {
+  /**
+   * @param {boolean|string} props.isTimeSeries - default false
+   * @param {boolean} props.isPercentage - default false
+   */
   constructor (props) {
     props = Object.assign({
       scale: getScale(),
@@ -109,6 +124,10 @@ export class DatagovsgStackedBar extends StackedBar {
 }
 
 export class DatagovsgLine extends MultipleLine {
+  /**
+   * @param {boolean|string} props.isTimeSeries - default false
+   * @param {boolean} props.isPercentage - default false
+   */
   constructor (props) {
     props = Object.assign({
       yScale: getScale(),
