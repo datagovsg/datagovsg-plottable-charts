@@ -160,7 +160,7 @@ export function groupItems (field) {
 /**
  * @param {string} labelField
  * @param {string} labelField
- * @param {(AggregateFunction|AggregateFunctionType)} type
+ * @param {(AggregateFunction|AggregateFunctionType)} [type]
  * @return {Transformation}
  */
 export function aggregate (labelField, valueField, type = 'sum') {

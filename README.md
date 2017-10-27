@@ -74,7 +74,7 @@ setupOuterLabel(pie)
 
 ```javascript
 /* js */
-const {SimplePie, plugins} = DatagovsgCharts
+const {SimplePie, plugins} = window.DatagovsgCharts
 const {highlightOnHover, setupOuterLabel} = plugins
 
 const pie = new SimplePie(props)
@@ -123,6 +123,217 @@ setupOuterLabel(pie)
 
 ### PivotTable
 
+##### Example usage
+```javascript
+import {DatagovsgLine} from 'datagovsg-plottable-charts'
+import PivotTable, {
+  filterItems,
+  filterGroups,
+  groupItems,
+  aggregate
+} from 'datagovsg-plottable-charts/dist/PivotTable'
+
+const pivotTable = new PivotTable(data)
+
+pivotTable.push(
+  filterItems('income', {type: 'exclude', values: ['-', 'na']}),
+  groupItems('gender'),
+  filterGroups('gender', {type: 'exclude', values: ['Total']})
+  aggregate('year', 'income')
+)
+
+const processedData = pivotTable.transform()
+
+const series = processedData.map(g => ({
+  label: g._group.gender,
+  series: g._summaries[0].series
+}))
+
+const chart = new DatagovsgLine({data: series})
+chart.mount(document.getElementById('chart'))
+```
+
+##### How it works
+
+**Original data**
+| year | gender | income |
+| ---- | ------ | ------ |
+| 2006 | Total  | 2042   |
+| 2016 | Total  | 3250   |
+| 2017 | Total  | -      |
+| 2006 | Male   | 2213   |
+| 2016 | Male   | 3500   |
+| 2006 | Female | 1875   |
+| 2016 | Female | 2979   |
+
+**Transform into custom data structure**
+```javascript
+pivotTable.transform()
+// returns
+[
+  {
+    _group: {},
+    _items: [
+      {year: 2006, gender: 'Total', income: 2042},
+      {year: 2016, gender: 'Total', income: 3250},
+      {year: 2016, gender: 'Total', income: '-'},
+      {year: 2006, gender: 'Male', income: 2213},
+      {year: 2016, gender: 'Male', income: 3500},
+      {year: 2006, gender: 'Female', income: 1875},
+      {year: 2016, gender: 'Female', income: 2979}
+    ],
+    _summaries: []
+  }
+]
+```
+
+**filterItems( )**
+```javascript
+pivotTable.push(
+  filterItems('income', {type: 'exclude', values: ['-', 'na']})
+)
+pivotTable.transform()
+// returns
+[
+  {
+    _group: {},
+    _items: [
+      {year: 2006, gender: 'Total', income: 2042},
+      {year: 2016, gender: 'Total', income: 3250},
+      {year: 2006, gender: 'Male', income: 2213},
+      {year: 2016, gender: 'Male', income: 3500},
+      {year: 2006, gender: 'Female', income: 1875},
+      {year: 2016, gender: 'Female', income: 2979}
+    ],
+    _summaries: []
+  }
+]
+```
+
+**groupItems( )**
+```javascript
+pivotTable.push(
+  filterItems('income', {type: 'exclude', values: ['Total']}),
+  groupItems('gender')
+)
+pivotTable.transform()
+// returns
+[
+  {
+    _group: {gender: 'Total'},
+    _items: [
+      {year: 2006, gender: 'Total', income: 2042},
+      {year: 2016, gender: 'Total', income: 3250},
+    ],
+    _summaries: []
+  },
+  {
+    _group: {gender: 'Male'},
+    _items: [
+      {year: 2006, gender: 'Male', income: 2213},
+      {year: 2016, gender: 'Male', income: 3500},
+    ],
+    _summaries: []
+  },
+  {
+    _group: {gender: 'Female'},
+    _items: [
+      {year: 2006, gender: 'Female', income: 1875},
+      {year: 2016, gender: 'Female', income: 2979}
+    ],
+    _summaries: []
+  }
+]
+```
+
+**filterGroups( )**
+```javascript
+pivotTable.push(
+  filterItems('income', {type: 'exclude', values: ['-', 'na']}),
+  groupItems('gender'),
+  filterGroups('gender', {type: 'exclude', values: ['Total']})
+)
+pivotTable.transform()
+// returns
+[
+  {
+    _group: {gender: 'Male'},
+    _items: [
+      {year: 2006, gender: 'Male', income: 2213},
+      {year: 2016, gender: 'Male', income: 3500},
+    ],
+    _summaries: []
+  },
+  {
+    _group: {gender: 'Female'},
+    _items: [
+      {year: 2006, gender: 'Female', income: 1875},
+      {year: 2016, gender: 'Female', income: 2979}
+    ],
+    _summaries: []
+  }
+]
+```
+
+**aggregate( )**
+```javascript
+pivotTable.push(
+  filterItems('income', {type: 'exclude', values: ['-', 'na']}),
+  groupItems('gender'),
+  filterGroups('gender', {type: 'exclude', values: ['Total']})
+  aggregate('year', 'income')
+)
+pivotTable.transform()
+// returns
+[
+  {
+    _group: {gender: 'Male'},
+    _items: [
+      {year: 2006, gender: 'Male', income: 2213},
+      {year: 2016, gender: 'Male', income: 3500},
+    ],
+    _summaries: [
+      {
+        labelField: 'year',
+        valueField: 'income',
+        series: [
+          {label: 2006, value: 2213},
+          {label: 2016, value: 3500}
+        ]
+      }
+    ]
+  },
+  {
+    _group: {gender: 'Female'},
+    _items: [
+      {year: 2006, gender: 'Female', income: 1875},
+      {year: 2016, gender: 'Female', income: 2979}
+    ],
+    _summaries: [
+      {
+        labelField: 'year',
+        valueField: 'income',
+        series: [
+          {label: 2006, value: 1875},
+          {label: 2016, value: 2979}
+        ]
+      }
+    ]
+  }
+]
+```
+
+##### Using without bundler
+```html
+<!-- html -->
+<script src="lib/pivot-table.min.js"></script>
+```
+
+```javascript
+/* js */
+const PivotTable = window.PivotTable
+const {filterItems, groupItems, filterGroups, aggregate} = PivotTable
+```
 
 ### Debugging guide
 
