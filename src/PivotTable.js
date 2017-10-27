@@ -5,16 +5,66 @@ import _min from 'lodash/min'
 import _max from 'lodash/max'
 import _uniq from 'lodash/uniq'
 
+/**
+ * @typedef {DataItem[]} RawData
+ * @typedef {DataGroup[]} ProcessedData
+ *
+ * @typedef {Object} DataGroup
+ * @property {Object} _group
+ * @property {DataItem[]} _items
+ * @property {DataSummary[]} _summaries
+ *
+ * @typedef {Object} DataSummary
+ * @property {(string|Function)} type
+ * @property {string} labelField
+ * @property {string} valueField
+ * @property {SeriesItem[]} series
+ *
+ * @typedef {Object} DataItem
+ *
+ * @typedef {Object} SeriesItem
+ * @property {string} label
+ * @property {number} value
+ *
+ * @callback Transformation
+ * @param {ProcessedData} data
+ * @return {ProcessedData}
+ *
+ * @callback FilterFunction
+ * @param {Object} datum
+ * @return {boolean}
+ *
+ * @typedef {Object} FilterObject
+ * @property {('include'|'exclude')} type
+ * @property {string[]} values
+ *
+ * @callback AggregateFunction
+ * @param {number[]} values
+ * @return {number}
+ *
+ * @typedef {('sum'|'avg'|'min'|'max'|'count'|'countd')} AggregateFunctionType
+ */
+
 export default class PivotTable {
+  /**
+   * @param {RawData} [data]
+   */
   constructor (data) {
     this.data = data
     this.transformations = []
   }
 
+  /**
+   * @param {...Transformation} transformation
+   */
   push (...args) {
     this.transformations.push(...args)
   }
 
+  /**
+   * @param {RawData} [data]
+   * @return {ProcessedData}
+   */
   transform (data) {
     data = data || this.data
     let result = [{
@@ -30,6 +80,15 @@ export default class PivotTable {
   }
 }
 
+/**
+
+ */
+
+/**
+ * @param {string} [field]
+ * @param {(FilterFunction|FilterObject)} filter
+ * @return {Transformation}
+ */
 export function filterItems (field, filter) {
   const filterFunc = (function (_field, _filter) {
     if (typeof _field === 'function') return _field
@@ -47,6 +106,11 @@ export function filterItems (field, filter) {
   return data => data.map(g => Object.assign({}, g, {_items: g._items.filter(filterFunc)}))
 }
 
+/**
+ * @param {string} [field]
+ * @param {(FilterFunction|FilterObject)} filter
+ * @return {Transformation}
+ */
 export function filterGroups (field, filter) {
   const filterFunc = (function (_field, _filter) {
     if (typeof _field === 'function') return _field
@@ -64,6 +128,10 @@ export function filterGroups (field, filter) {
   return data => data.filter(g => filterFunc(g._group))
 }
 
+/**
+ * @param {string} field
+ * @return {Transformation}
+ */
 export function groupItems (field) {
   if (typeof field !== 'string') throw new TypeError()
   return data => {
@@ -89,6 +157,12 @@ export function groupItems (field) {
   }
 }
 
+/**
+ * @param {string} labelField
+ * @param {string} labelField
+ * @param {(AggregateFunction|AggregateFunctionType)} type
+ * @return {Transformation}
+ */
 export function aggregate (labelField, valueField, type = 'sum') {
   if (typeof labelField !== 'string') throw new TypeError()
   if (typeof valueField !== 'string') throw new TypeError()

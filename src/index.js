@@ -36,7 +36,7 @@ export class DatagovsgSimplePie extends SimplePie {
 
 export class DatagovsgSimpleBar extends SimpleBar {
   /**
-   * @param {boolean|string} props.isTimeSeries - default false
+   * @param {(boolean|string)} props.isTimeSeries - default false
    * @param {boolean} props.isPercentage - default false
    */
   constructor (props) {
@@ -79,7 +79,7 @@ export class DatagovsgHorizontalBar extends SimpleBar {
 
 export class DatagovsgGroupedBar extends GroupedBar {
   /**
-   * @param {boolean|string} props.isTimeSeries - default false
+   * @param {(boolean|string)} props.isTimeSeries - default false
    * @param {boolean} props.isPercentage - default false
    */
   constructor (props) {
@@ -102,7 +102,7 @@ export class DatagovsgGroupedBar extends GroupedBar {
 
 export class DatagovsgStackedBar extends StackedBar {
   /**
-   * @param {boolean|string} props.isTimeSeries - default false
+   * @param {(boolean|string)} props.isTimeSeries - default false
    * @param {boolean} props.isPercentage - default false
    */
   constructor (props) {
@@ -125,7 +125,7 @@ export class DatagovsgStackedBar extends StackedBar {
 
 export class DatagovsgLine extends MultipleLine {
   /**
-   * @param {boolean|string} props.isTimeSeries - default false
+   * @param {(boolean|string)} props.isTimeSeries - default false
    * @param {boolean} props.isPercentage - default false
    */
   constructor (props) {

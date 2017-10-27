@@ -1,12 +1,12 @@
 import {getCustomTimeAxisConfigs} from './helpers'
 
 /**
- * @callback {Function} Accessor
+ * @callback Accessor
  * @param {Object} datum
  * @param {number} index
  * @param {Object} dataset
  *
- * @return {string}
+ * @return {string} - html string to be rendered
  */
 
 /**
