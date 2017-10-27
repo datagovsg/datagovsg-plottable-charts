@@ -1,8 +1,7 @@
 import Chart from './Chart'
-import {getCustomShortScaleFormatter} from '../helpers'
 
 /**
- * @typedef {Object} MultipleLine
+ * @typedef {Object} Chart
  * @property {Object} layout
  * @property {Object} plot.lines
  * @property {Object} plot.markers
@@ -18,76 +17,67 @@ import {getCustomShortScaleFormatter} from '../helpers'
  * @property {Function} update
  * @property {Function} unmount
  * @property {Object} options
+ *
+ * @typedef {Object} DataSeries
+ * @property {string[]} label - required
+ * @property {DataPoint[]} series - required
+ *
+ * @typedef {Object} DataPoint
+ * @property {string[]} label - required
+ * @property {number[]} value - required
  */
 
 export default class MultipleLine extends Chart {
   /**
    * @param {Object} props
-   * @param {string[]} props.labels - required
-   * @param {Object[]} props.traces - required
-   * @param {number[]} props.traces.x- required
-   * @param {number[]} props.traces.y - required
+   * @param {DataSeries[]} props.data
    * @param {Object} props.xScale - default new Plottable.Scales.Linear()
    * @param {Object} props.yScale - default new Plottable.Scales.Linear()
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
    * @param {number} props.strokeWidth - default 2
    * @param {number} props.markerSize - default 0
-   * @param {boolean} props.hideXaxis - default false
-   * @param {boolean} props.hideYaxis - default false
    * @param {boolean} props.showXgridlines - default false
    * @param {boolean} props.showYgridlines - default false
-   * @param {('v'|'h'|'vh'|'hv'|'none')} props.guideLine - default 'none'
-   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
+   * @param {boolean} props.hideXaxis - default false
+   * @param {boolean} props.hideYaxis - default false
    * @param {string} props.xLabel - optional
    * @param {string} props.yLabel - optional
+   * @param {('v'|'h'|'vh'|'hv'|'none')} props.guideLine - default 'none'
+   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
    * @param {Function} props.clickHandler - optional
    * @param {Function} props.hoverHandler - optional
    *
-   * @return {MultipleLine}
+   * @return {Chart}
    */
   constructor (props) {
     super()
-    this.options = {
-      strokeWidth: 2,
-      markerSize: 0,
-      hideXaxis: false,
-      hideYaxis: false,
-      showXgridlines: false,
-      showYgridlines: false,
-      guideLine: 'none',
-      legendPosition: 'r'
-    }
     props = Object.assign(this.options, props)
 
-    if (props.labels.length !== props.traces.length) throw new Error()
-    this.datasets = props.traces.map((t, i) => {
-      if (t.x.length !== t.y.length) throw new Error()
-      const data = t.y.map((v, i) => ({value: v, label: t.x[i]}))
-      return new Plottable.Dataset(data, props.labels[i])
-    })
-
-    const xScale = props.xScale || new Plottable.Scales.Linear()
-    const yScale = props.yScale || new Plottable.Scales.Linear()
+    const scale = props.yScale || new Plottable.Scales.Linear()
+    const categoryScale = props.xScale || new Plottable.Scales.Linear()
     const colorScale = props.colorScale || new Plottable.Scales.Color()
 
     this.plot = {
       lines: new Plottable.Plots.Line()
         .attr('stroke', (d, i, dataset) => dataset.metadata(), colorScale)
-        .x(d => d.label, xScale)
-        .y(d => d.value, yScale)
+        .x(d => d.label, categoryScale)
+        .y(d => d.value, scale)
         .attr('stroke-width', props.strokeWidth),
       markers: new Plottable.Plots.Scatter()
         .attr('opacity', 1)
         .attr('fill', (d, i, dataset) => dataset.metadata(), colorScale)
-        .x(d => d.label, xScale)
-        .y(d => d.value, yScale)
+        .x(d => d.label, categoryScale)
+        .y(d => d.value, scale)
         .size(props.markerSize)
     }
 
-    this.datasets.forEach(dataset => {
-      this.plot.lines.addDataset(dataset)
-      this.plot.markers.addDataset(dataset)
-    })
+    if (props.data) {
+      this.datasets = props.data.map(s => new Plottable.Dataset(s.series, s.label))
+      this.datasets.forEach(dataset => {
+        this.plot.lines.addDataset(dataset)
+        this.plot.markers.addDataset(dataset)
+      })
+    }
 
     if (props.clickHandler) {
       new Plottable.Interactions.Click()
@@ -111,8 +101,8 @@ export default class MultipleLine extends Chart {
     }
 
     this.gridlines = new Plottable.Components.Gridlines(
-      (props.showXgridlines && xScale instanceof Plottable.QuantitativeScale) ? xScale : null,
-      (props.showYgridlines && yScale instanceof Plottable.QuantitativeScale) ? yScale : null
+      (props.showXgridlines && categoryScale instanceof Plottable.QuantitativeScale) ? categoryScale : null,
+      (props.showYgridlines && scale instanceof Plottable.QuantitativeScale) ? scale : null
     )
 
     this.guideLine = {horizontal: null, vertical: null}
@@ -120,7 +110,7 @@ export default class MultipleLine extends Chart {
     if (['v', 'vh', 'hv'].indexOf(props.guideLine) > -1) {
       this.guideLine.vertical = new Plottable.Components.GuideLineLayer(
         Plottable.Components.GuideLineLayer.ORIENTATION_VERTICAL
-      ).scale(xScale)
+      ).scale(categoryScale)
       new Plottable.Interactions.Pointer()
         .onPointerMove(point => {
           const target = this.plot.markers.entityNearest(point)
@@ -142,7 +132,7 @@ export default class MultipleLine extends Chart {
     if (['h', 'vh', 'hv'].indexOf(props.guideLine) > -1) {
       this.guideLine.horizontal = new Plottable.Components.GuideLineLayer(
         Plottable.Components.GuideLineLayer.ORIENTATION_HORIZONTAL
-      ).scale(yScale)
+      ).scale(scale)
       new Plottable.Interactions.Pointer()
         .onPointerMove(point => {
           const target = this.plot.markers.entityNearest(point)
@@ -170,78 +160,46 @@ export default class MultipleLine extends Chart {
       this.plot.markers
     ])
 
-    this.legend = new Plottable.Components.Legend(colorScale)
-      .xAlignment('center')
-      .yAlignment('center')
-
-    const _layout = new Plottable.Components.Table([
+    this.layout = new Plottable.Components.Table([
       [null, null, plotArea],
       [null, null, null],
       [null, null, null]
     ])
     if (!props.hideXaxis) {
-      if (xScale instanceof Plottable.Scales.Time) {
-        this.xAxis = new Plottable.Axes.Time(xScale, 'bottom')
-      } else if (xScale instanceof Plottable.QuantitativeScale) {
-        this.xAxis = new Plottable.Axes.Numeric(xScale, 'bottom')
-          .formatter(getCustomShortScaleFormatter())
+      if (categoryScale instanceof Plottable.Scales.Time) {
+        this.xAxis = new Plottable.Axes.Time(categoryScale, 'bottom')
+      } else if (categoryScale instanceof Plottable.QuantitativeScale) {
+        this.xAxis = new Plottable.Axes.Numeric(categoryScale, 'bottom')
       } else {
-        this.xAxis = new Plottable.Axes.Category(xScale, 'bottom')
+        this.xAxis = new Plottable.Axes.Category(categoryScale, 'bottom')
       }
-      _layout.add(this.xAxis, 1, 2)
+      this.layout.add(this.xAxis, 1, 2)
     }
     if (!props.hideYaxis) {
-      if (yScale instanceof Plottable.Scales.Time) {
-        this.yAxis = new Plottable.Axes.Time(yScale, 'left')
-      } else if (yScale instanceof Plottable.QuantitativeScale) {
-        this.yAxis = new Plottable.Axes.Numeric(yScale, 'left')
-          .formatter(getCustomShortScaleFormatter())
+      if (scale instanceof Plottable.Scales.Time) {
+        this.yAxis = new Plottable.Axes.Time(scale, 'left')
+      } else if (scale instanceof Plottable.QuantitativeScale) {
+        this.yAxis = new Plottable.Axes.Numeric(scale, 'left')
       } else {
-        this.yAxis = new Plottable.Axes.Category(yScale, 'left')
+        this.yAxis = new Plottable.Axes.Category(scale, 'left')
       }
-      _layout.add(this.yAxis, 0, 1)
+      this.layout.add(this.yAxis, 0, 1)
     }
     if (props.xLabel) {
-      _layout.add(new Plottable.Components.AxisLabel(props.xLabel), 2, 2)
+      this.layout.add(new Plottable.Components.AxisLabel(props.xLabel), 2, 2)
     }
     if (props.yLabel) {
-      _layout.add(new Plottable.Components.AxisLabel(props.yLabel, -90), 0, 0)
+      this.layout.add(new Plottable.Components.AxisLabel(props.yLabel, -90), 0, 0)
     }
 
-    if (props.legendPosition === 't') {
-      this.layout = new Plottable.Components.Table([
-        [this.legend.maxEntriesPerRow(Infinity)],
-        [_layout]
-      ]).rowPadding(10)
-    } else if (props.legendPosition === 'r') {
-      this.layout = new Plottable.Components.Table([
-        [_layout, this.legend]
-      ]).columnPadding(10)
-    } else if (props.legendPosition === 'b') {
-      this.layout = new Plottable.Components.Table([
-        [_layout],
-        [this.legend.maxEntriesPerRow(Infinity)]
-      ]).rowPadding(10)
-    } else if (props.legendPosition === 'l') {
-      this.layout = new Plottable.Components.Table([
-        [this.legend, _layout]
-      ]).columnPadding(10)
-    } else if (props.legendPosition === 'none') {
-      this.layout = _layout
-    }
+    this._setLegend(props, colorScale)
   }
 
   update (nextProps) {
-    if (nextProps.labels.length !== nextProps.traces.length) throw new Error()
-    this.datasets = nextProps.traces.map((t, i) => {
-      if (t.x.length !== t.y.length) throw new Error()
-      const data = t.y.map((v, i) => ({value: v, label: t.x[i]}))
-      return new Plottable.Dataset(data).metadata(nextProps.labels[i])
-    })
-    Object.assign(this.options, {
-      labels: nextProps.labels,
-      traces: nextProps.traces
-    })
+    this.datasets = nextProps.data.map(s => new Plottable.Dataset(s.series, s.label))
+    this.plot.lines.datasets(this.datasets)
+    this.plot.markers.datasets(this.datasets)
+    this.options.data = nextProps.data
     this.onUpdate(nextProps)
   }
 }

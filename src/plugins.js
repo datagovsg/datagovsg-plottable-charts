@@ -1,32 +1,72 @@
-// to overwrite default highlight color,
-// add a css rule on .highlight and mark it !important
-//
-// eg.
-//
-// .highlight {
-//   fill: anotherColor!important;
-// }
-export function highlightOnHover (component, props) {
-  new Plottable.Interactions.Pointer()
-    .onPointerMove(point => {
-      component.plot.entities().forEach(e => {
-        e.selection.classed('highlight', false).style('fill', '')
+import {getCustomTimeAxisConfigs} from './helpers'
+
+/**
+ * @callback Accessor
+ * @param {Object} datum
+ * @param {number} index
+ * @param {Object} dataset
+ *
+ * @return {string} - html string to be rendered
+ */
+
+/**
+ * to overwrite default highlight color,
+ * add a css rule on .highlight and mark it !important. Eg.
+ *
+ * .highlight {
+ *   stroke: anotherColor !important;
+ *   fill: anotherColor !important;
+ * }
+ */
+export function highlightOnHover (component) {
+  if (component.plot.markers) {
+    new Plottable.Interactions.Pointer()
+      .onPointerMove(point => {
+        component.plot.markers.entities().forEach(e => {
+          e.selection
+            .classed('highlight', false)
+            .style('stroke', '')
+            .style('fill', '')
+        })
+        const target = component.plot.markers.entityNearest(point)
+        if (target) {
+          target.selection
+            .classed('highlight', true)
+            .style('stroke', 'black')
+            .style('fill', 'white')
+        }
       })
-      const target = component.plot.entitiesAt(point)[0]
-      if (target) {
-        target.selection.classed('highlight', true).style('fill', 'lightgrey')
-      }
-    })
-    .onPointerExit(point => {
-      component.plot.entities().forEach(e => {
-        e.selection.classed('highlight', false).style('fill', '')
+      .onPointerExit(point => {
+        component.plot.markers.entities().forEach(e => {
+          e.selection
+            .classed('highlight', false)
+            .style('stroke', '')
+            .style('fill', '')
+        })
       })
-    })
-    .attachTo(component.plot)
+      .attachTo(component.plot.markers)
+  } else {
+    new Plottable.Interactions.Pointer()
+      .onPointerMove(point => {
+        component.plot.entities().forEach(e => {
+          e.selection.classed('highlight', false).style('fill', '')
+        })
+        const target = component.plot.entitiesAt(point)[0]
+        if (target) {
+          target.selection.classed('highlight', true).style('fill', 'lightgrey')
+        }
+      })
+      .onPointerExit(point => {
+        component.plot.entities().forEach(e => {
+          e.selection.classed('highlight', false).style('fill', '')
+        })
+      })
+      .attachTo(component.plot)
+  }
 }
 
 /**
- * @param {Function} props.title - required
+ * @param {Accessor} props.title - required
  */
 export function setupTooltip (component, props) {
   const plot = component.plot.markers || component.plot
@@ -62,6 +102,23 @@ export function setupTooltip (component, props) {
         else return 'left'
       }
     })
+
+    if (component.plot.markers) {
+      new Plottable.Interactions.Pointer()
+        .onPointerMove(point => {
+          component.plot.markers.entities().forEach(e => {
+            $(e.selection.node()).tooltip('hide')
+          })
+          const target = component.plot.markers.entityNearest(point)
+          if (target) $(target.selection.node()).tooltip('show')
+        })
+        .onPointerExit(point => {
+          component.plot.markers.entities().forEach(e => {
+            $(e.selection.node()).tooltip('hide')
+          })
+        })
+        .attachTo(component.plot.markers)
+    }
   }
 
   component.onUnmount = function () {
@@ -70,8 +127,8 @@ export function setupTooltip (component, props) {
 }
 
 /**
- * @param {Function} props.title - required
- * @param {Function} props.content - optional
+ * @param {Accessor} props.title - required
+ * @param {Accessor} props.content - optional
  */
 export function setupPopover (component, props) {
   const plot = component.plot.markers || component.plot
@@ -109,6 +166,23 @@ export function setupPopover (component, props) {
         else return 'left'
       }
     })
+
+    if (component.plot.markers) {
+      new Plottable.Interactions.Pointer()
+        .onPointerMove(point => {
+          component.plot.markers.entities().forEach(e => {
+            $(e.selection.node()).popover('hide')
+          })
+          const target = component.plot.markers.entityNearest(point)
+          if (target) $(target.selection.node()).popover('show')
+        })
+        .onPointerExit(point => {
+          component.plot.markers.entities().forEach(e => {
+            $(e.selection.node()).popover('hide')
+          })
+        })
+        .attachTo(component.plot.markers)
+    }
   }
 
   component.onUnmount = function () {
@@ -117,8 +191,8 @@ export function setupPopover (component, props) {
 }
 
 /**
- * @param {Function} props.title - required
- * @param {Function} props.content - optional
+ * @param {Accessor} props.title - required
+ * @param {Accessor} props.content - optional
  */
 export function setupPopoverOnGuideLine (component, props) {
   let $guideLine
@@ -181,8 +255,8 @@ export function setupPopoverOnGuideLine (component, props) {
 }
 
 /**
- * @param {Function} props.title - required
- * @param {Function} props.content - optional
+ * @param {Accessor} props.title - required
+ * @param {Accessor} props.content - optional
  */
 export function setupShadowWithPopover (component, props) {
   const plotArea = component.plot.parent()
@@ -289,7 +363,7 @@ export function setupShadowWithPopover (component, props) {
 }
 
 /**
- * @param {Function} props.labelFormatter - default d => d.label
+ * @param {Accessor} props.labelFormatter - default d => d.label
  */
 export function setupOuterLabel (component, props = {labelFormatter: d => d.label}) {
   component.plot.outerRadius(d => {
@@ -372,11 +446,36 @@ export function setupOuterLabel (component, props = {labelFormatter: d => d.labe
   }
 }
 
-/*
-  FIXME
-  Very very hackish stuff
-  Might break when upgrading to Plottable 3.0
-*/
+/**
+ * type can be one of the following
+ *   'year'
+ *   'financial_year'
+ *   'half_year'
+ *   'financial_half_year'
+ *   'quarter'
+ *   'financial_quarter'
+ *   'month'
+ *   'week'
+ *   'date'
+ *   'datetime'
+ *   'time'
+ */
+export function customizeTimeAxis (component, type) {
+  const axis = component.xAxis
+  if (axis instanceof Plottable.Axes.Time) {
+    const customTimeAxisConfigs = getCustomTimeAxisConfigs(type)
+    axis.axisConfigurations(customTimeAxisConfigs)
+    if (type === 'year' || type === 'financial_year') {
+      axis.tierLabelPositions(customTimeAxisConfigs.map(v => 'center'))
+    }
+  }
+}
+
+/**
+ * FIXME
+ * Very very hackish stuff
+ * Might break when upgrading to Plottable 3.0
+ */
 
 export function removeInnerPadding (component) {
   const _makeInnerScale = component.plot._makeInnerScale
@@ -387,42 +486,38 @@ export function removeInnerPadding (component) {
 }
 
 export function downsampleTicks (component) {
-  function _downsample (axis) {
-    if (axis instanceof Plottable.Axes.Category) {
-      const renderImmediately = axis.renderImmediately
-      axis.renderImmediately = function () {
-        const minimumSpacing = d3.max(this._scale.domain(),
-          v => this._measurer.measure(v).width) * 1.5
-        const downsampleRatio = Math.ceil(minimumSpacing / this._scale.stepWidth())
-        const domain = this._scale.domain
-        const stepWidth = this._scale.stepWidth
-        this._scale.domain = function () {
-          return domain.call(this)
-            .filter((v, i) => i % downsampleRatio === 0)
-        }
-        this._scale.stepWidth = function () {
-          return stepWidth.call(this) * downsampleRatio
-        }
-        renderImmediately.call(this)
-        this._scale.domain = domain
-        this._scale.stepWidth = stepWidth
+  const axis = component.xAxis
+  if (axis instanceof Plottable.Axes.Category) {
+    const renderImmediately = axis.renderImmediately
+    axis.renderImmediately = function () {
+      const minimumSpacing = d3.max(this._scale.domain(),
+        v => this._measurer.measure(v.toString()).width) * 1.5
+      const downsampleRatio = Math.ceil(minimumSpacing / this._scale.stepWidth())
+      const domain = this._scale.domain
+      const stepWidth = this._scale.stepWidth
+      this._scale.domain = function () {
+        return domain.call(this)
+          .filter((v, i) => i % downsampleRatio === 0)
       }
+      this._scale.stepWidth = function () {
+        return stepWidth.call(this) * downsampleRatio
+      }
+      renderImmediately.call(this)
+      this._scale.domain = domain
+      this._scale.stepWidth = stepWidth
+    }
 
-      const _measureTicks = axis._measureTicks
-      axis._measureTicks = function (...args) {
-        const wrap = this._wrapper.wrap
-        this._wrapper.wrap = function (...args) {
-          const result = wrap.call(this, ...args)
-          result.wrappedText = result.originalText
-          return result
-        }
-        const result = _measureTicks.call(this, ...args)
-        this._wrapper.wrap = wrap
+    const _measureTicks = axis._measureTicks
+    axis._measureTicks = function (...args) {
+      const wrap = this._wrapper.wrap
+      this._wrapper.wrap = function (...args) {
+        const result = wrap.call(this, ...args)
+        result.wrappedText = result.originalText
         return result
       }
+      const result = _measureTicks.call(this, ...args)
+      this._wrapper.wrap = wrap
+      return result
     }
   }
-
-  _downsample(component.xAxis)
-  _downsample(component.yAxis)
 }

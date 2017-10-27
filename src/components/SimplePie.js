@@ -2,7 +2,7 @@ import Chart from './Chart'
 import sortBy from 'lodash/sortBy'
 
 /**
- * @typedef {Object} SimplePie
+ * @typedef {Object} Chart
  * @property {Object} layout
  * @property {Object} plot
  * @property {Object} legend
@@ -10,42 +10,38 @@ import sortBy from 'lodash/sortBy'
  * @property {Function} update
  * @property {Function} unmount
  * @property {Object} options
+ *
+ * @typedef {Object} DataPoint
+ * @property {string[]} label - required
+ * @property {number[]} value - required
  */
 
 export default class SimplePie extends Chart {
   /**
    * @param {Object} props
-   * @param {string[]} props.labels - required
-   * @param {number[]} props.valuess - required
+   * @param {DataPoint[]} props.data
    * @param {boolean} props.sorted - default false
    * @param {Object} props.colorScale - default new Plottable.Scales.Color()
    * @param {number} props.innerRadius - default 0
    * @param {number} props.outerRadius - default min(plot.height, plot.width) / 2
    * @param {Function} props.labelFormatter - optional
-   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'r'
+   * @param {('t'|'r'|'b'|'l'|'none')} props.legendPosition - default 'none'
    * @param {boolean} props.animated - default true
    * @param {Function} props.clickHandler - optional
    * @param {Function} props.hoverHandler - optional
    *
-   * @return {SimplePie}
+   * @return {Chart}
    */
   constructor (props) {
     super()
-    this.options = {
-      sorted: false,
-      innerRadius: 0,
-      legendPosition: 'none',
-      animated: true
-    }
+    this.options.legendPosition = 'none'
     props = Object.assign(this.options, props)
 
-    if (props.labels.length !== props.values.length) throw new Error()
-    let data = props.values.map((v, i) => ({value: v, label: props.labels[i]}))
-    if (props.sorted) data = sortBy(data, 'value')
-    if (props.sorted === 'd') data.reverse()
-    this.dataset = new Plottable.Dataset(data)
+    if (props.sorted) props.data = sortBy(props.data, 'value')
+    if (props.sorted === 'd') props.data.reverse()
+    this.dataset = new Plottable.Dataset(props.data)
 
-    const total = data.reduce((sum, d) => sum + d.value, 0)
+    const total = props.data.reduce((sum, d) => sum + d.value, 0)
     const scale = new Plottable.Scales.Linear().domain([0, total])
     const colorScale = props.colorScale || new Plottable.Scales.Color()
 
@@ -65,66 +61,19 @@ export default class SimplePie extends Chart {
       this.plot.labelFormatter(props.labelFormatter).labelsEnabled(true)
     }
 
-    if (props.clickHandler) {
-      new Plottable.Interactions.Click()
-        .onClick(point => {
-          const target = this.plot.entitiesAt(point)[0]
-          props.clickHandler(target, this.plot.entities())
-        })
-        .attachTo(this.plot)
-    }
+    this.layout = this.plot
 
-    if (props.hoverHandler) {
-      new Plottable.Interactions.Pointer()
-        .onPointerMove(point => {
-          const target = this.plot.entitiesAt(point)[0]
-          props.hoverHandler(target, this.plot.entities())
-        })
-        .onPointerExit(point => {
-          props.hoverHandler(null, this.plot.entities())
-        })
-        .attachTo(this.plot)
-    }
-
-    this.legend = new Plottable.Components.Legend(colorScale)
-      .xAlignment('center')
-      .yAlignment('center')
-    if (props.legendPosition === 't') {
-      this.layout = new Plottable.Components.Table([
-        [this.legend.maxEntriesPerRow(Infinity)],
-        [this.plot]
-      ]).rowPadding(10)
-    } else if (props.legendPosition === 'r') {
-      this.layout = new Plottable.Components.Table([
-        [this.plot, this.legend]
-      ]).columnPadding(10)
-    } else if (props.legendPosition === 'b') {
-      this.layout = new Plottable.Components.Table([
-        [this.plot],
-        [this.legend.maxEntriesPerRow(Infinity)]
-      ]).rowPadding(10)
-    } else if (props.legendPosition === 'l') {
-      this.layout = new Plottable.Components.Table([
-        [this.legend, this.plot]
-      ]).columnPadding(10)
-    } else if (props.legendPosition === 'none') {
-      this.layout = this.plot
-    }
+    this._setLegend(props, colorScale)
+    this._setInteractions(props)
   }
 
   update (nextProps) {
-    if (nextProps.labels.length !== nextProps.values.length) throw new Error()
-    let data = nextProps.values
-      .map((v, i) => ({value: v, label: nextProps.labels[i]}))
-    if (this.options.sorted) data = sortBy(data, 'value')
-    if (this.options.sorted === 'd') data.reverse()
-    const total = data.reduce((sum, d) => sum + d.value, 0)
+    if (this.options.sorted) nextProps.data = sortBy(nextProps.data, 'value')
+    if (this.options.sorted === 'd') nextProps.data.reverse()
+    const total = nextProps.data.reduce((sum, d) => sum + d.value, 0)
     this.plot.sectorValue().scale.domain([0, total])
-    this.dataset.data(data)
-    Object.assign(this.options, {
-      labels: nextProps.labels,
-      values: nextProps.values
-    })
+    this.dataset.data(nextProps.data)
+    Object.assign(this.options, {data: nextProps.data})
     this.onUpdate(nextProps)
   }
 }
