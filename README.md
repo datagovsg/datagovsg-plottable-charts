@@ -86,39 +86,39 @@ setupOuterLabel(pie)
 ### Full Component List
 
 ##### Pre-styled
-- [DatagovsgSimplePie](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/index.js#L25)
-- [DatagovsgSimpleBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/index.js#L37)
-- [DatagovsgHorizontalBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/index.js#L59)
-- [DatagovsgGroupedBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/index.js#L80)
-- [DatagovsgStackedBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/index.js#L103)
-- [DatagovsgLine](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/index.js#L126)
+- [DatagovsgSimplePie](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/index.js#L25)
+- [DatagovsgSimpleBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/index.js#L37)
+- [DatagovsgHorizontalBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/index.js#L59)
+- [DatagovsgGroupedBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/index.js#L80)
+- [DatagovsgStackedBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/index.js#L103)
+- [DatagovsgLine](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/index.js#L126)
 
 ##### Unstyled
-- [SimplePie](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/components/SimplePie.js)
-- [SimpleBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/components/SimpleBar.js)
-- [GroupedBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/components/GroupedBar.js)
-- [StackedBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/components/StackedBar.js)
-- [MultipleLine](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/components/MultipleLine.js)
+- [SimplePie](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/components/SimplePie.js)
+- [SimpleBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/components/SimpleBar.js)
+- [GroupedBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/components/GroupedBar.js)
+- [StackedBar](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/components/StackedBar.js)
+- [MultipleLine](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/components/MultipleLine.js)
 
 
 ### Full Plugin List
-- [highlightOnHover](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/plugins.js#L21)
-- [setupTooltip](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/plugins.js#L71)
-- [setupPopover](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/plugins.js#L133)
-- [setupPopoverOnGuideLine](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/plugins.js#L197)
-- [setupShadowWithPopover](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/plugins.js#L368)
-- [customizeTimeAxis](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/plugins.js#L463)
-- [removeInnerPadding](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/plugins.js#L480)
-- [downsampleTicks](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/plugins.js#L488)
+- [highlightOnHover](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/plugins.js#L21)
+- [setupTooltip](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/plugins.js#L71)
+- [setupPopover](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/plugins.js#L133)
+- [setupPopoverOnGuideLine](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/plugins.js#L197)
+- [setupShadowWithPopover](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/plugins.js#L368)
+- [customizeTimeAxis](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/plugins.js#L463)
+- [removeInnerPadding](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/plugins.js#L480)
+- [downsampleTicks](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/plugins.js#L488)
 
 
 ### Useful helpers
-- [DATAGOVSG_COLORS](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/helpers.js#L13)
-- [getScale](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/helpers.js#L16)
-- [getCategoryScale](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/helpers.js#L21)
-- [getColorScale](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/helpers.js#L28)
-- [getSingleColorScale](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/helpers.js#L32)
-- [getTimeScale](https://github.com/datagovsg/datagovsg-plottable-charts/blob/upgrade/src/helpers.js#L40)
+- [DATAGOVSG_COLORS](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/helpers.js#L13)
+- [getScale](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/helpers.js#L16)
+- [getCategoryScale](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/helpers.js#L21)
+- [getColorScale](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/helpers.js#L28)
+- [getSingleColorScale](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/helpers.js#L32)
+- [getTimeScale](https://github.com/datagovsg/datagovsg-plottable-charts/blob/master/src/helpers.js#L40)
 
 
 ### PivotTable
