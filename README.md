@@ -156,6 +156,7 @@ chart.mount(document.getElementById('chart'))
 ##### How it works
 
 **Original data**
+
 | year | gender | income |
 | ---- | ------ | ------ |
 | 2006 | Total  | 2042   |
