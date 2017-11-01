@@ -70,10 +70,10 @@ export function getCustomTickGenerator () {
   return function (scale) {
     const [domainMin, domainMax] = scale.domain()
     const domainRange = domainMax - domainMin
-    const nearestPower = Math.pow(10, Math.floor(Math.log(domainRange) / Math.LN10))
-    let factor = domainRange / nearestPower / targetLineCount
-    factor = [2, 1, 0.5, 0.2].filter(v => v <= factor)[0]
-    const interval = nearestPower * (factor * 10) / 10
+    const nearestPower = Math.pow(10, Math.floor(Math.log(domainRange / targetLineCount) / Math.LN10))
+    let factor = domainRange / targetLineCount / nearestPower
+    factor = [10, 5, 2, 1, 0.5].filter(v => v <= factor)[0]
+    const interval = nearestPower * factor
     const firstTick = Math.ceil(domainMin / interval)
     const lastTick = Math.floor(domainMax / interval)
     return range(firstTick, lastTick + 1).map(v => v * interval)
