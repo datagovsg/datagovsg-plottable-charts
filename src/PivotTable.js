@@ -75,7 +75,7 @@ export default class PivotTable {
     this.transformations.forEach(t => {
       result = t(result)
     })
-    this.transformation = []
+    this.transformations = []
     return result
   }
 }
