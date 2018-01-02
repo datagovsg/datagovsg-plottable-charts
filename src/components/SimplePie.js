@@ -12,8 +12,8 @@ import sortBy from 'lodash/sortBy'
  * @property {Object} options
  *
  * @typedef {Object} DataPoint
- * @property {string[]} label - required
- * @property {number[]} value - required
+ * @property {string} label - required
+ * @property {number} value - required
  */
 
 export default class SimplePie extends Chart {

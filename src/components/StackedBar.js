@@ -16,12 +16,12 @@ import Chart from './Chart'
  * @property {Object} options
  *
  * @typedef {Object} DataSeries
- * @property {string[]} label - required
+ * @property {string} label - required
  * @property {DataPoint[]} series - required
  *
  * @typedef {Object} DataPoint
- * @property {string[]} label - required
- * @property {number[]} value - required
+ * @property {string} label - required
+ * @property {number} value - required
  */
 
 export default class StackedBar extends Chart {
